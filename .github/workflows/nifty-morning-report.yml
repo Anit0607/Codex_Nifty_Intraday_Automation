@@ -25,6 +25,7 @@ jobs:
       OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'high' }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      CODEX_NIFTY_INTRADAY_AUTOMATION: ${{ secrets.CODEX_NIFTY_INTRADAY_AUTOMATION }}
     steps:
       - uses: actions/checkout@v4
 
@@ -41,6 +42,9 @@ jobs:
         run: |
           missing=0
           if [ -z "$OPENAI_API_KEY" ]; then
+            if [ -n "$CODEX_NIFTY_INTRADAY_AUTOMATION" ]; then
+              echo "::error::Detected combined secret CODEX_NIFTY_INTRADAY_AUTOMATION. GitHub secrets are not parsed from multiline values; create separate repository secrets named OPENAI_API_KEY, TELEGRAM_BOT_TOKEN, and TELEGRAM_CHAT_ID."
+            fi
             echo "::error::Missing GitHub Actions secret OPENAI_API_KEY"
             missing=1
           fi

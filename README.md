@@ -19,6 +19,8 @@ Add these repository secrets before enabling live use:
 
 These must be **repository Actions secrets**, not variables and not environment-only secrets unless the workflow is also configured with that environment.
 
+Do not create one combined multiline secret with all values. GitHub Actions does not parse secret contents into separate environment variables.
+
 Optional repository variables:
 
 - `OPENAI_MODEL`, default `gpt-5`
