@@ -13,6 +13,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   evening-tally:
     runs-on: ubuntu-latest
@@ -34,6 +37,21 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r skills/nifty-intraday-desk/scripts/requirements.txt
 
+      - name: Validate required secrets
+        run: |
+          missing=0
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::Missing GitHub Actions secret OPENAI_API_KEY"
+            missing=1
+          fi
+          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+            echo "::warning::Missing TELEGRAM_BOT_TOKEN; tally will be generated but Telegram delivery will be skipped."
+          fi
+          if [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "::warning::Missing TELEGRAM_CHAT_ID; tally will be generated but Telegram delivery will be skipped."
+          fi
+          exit "$missing"
+
       - name: Generate and deliver evening tally
         run: |
           python skills/nifty-intraday-desk/scripts/cloud_report_agent.py --mode evening --date "${{ github.event.inputs.date || 'today' }}"
@@ -49,4 +67,3 @@ jobs:
             git commit -m "Add automated evening tally"
             git push
           fi
-

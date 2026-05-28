@@ -17,6 +17,8 @@ Add these repository secrets before enabling live use:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 
+These must be **repository Actions secrets**, not variables and not environment-only secrets unless the workflow is also configured with that environment.
+
 Optional repository variables:
 
 - `OPENAI_MODEL`, default `gpt-5`
