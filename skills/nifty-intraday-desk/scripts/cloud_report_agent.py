@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -56,12 +57,15 @@ def call_openai(prompt: str) -> str:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is required for cloud automation.")
-    model = os.environ.get("OPENAI_MODEL", "gpt-5").strip() or "gpt-5"
-    effort = os.environ.get("OPENAI_REASONING_EFFORT", "high").strip() or "high"
+    model = os.environ.get("OPENAI_MODEL", "gpt-5.5").strip() or "gpt-5.5"
+    effort = os.environ.get("OPENAI_REASONING_EFFORT", "xhigh").strip() or "xhigh"
+    poll_timeout_seconds = int(os.environ.get("OPENAI_BACKGROUND_TIMEOUT_SECONDS", "2400"))
 
     payload = {
         "model": model,
         "reasoning": {"effort": effort},
+        "background": True,
+        "store": True,
         "tools": [
             {
                 "type": "web_search",
@@ -78,15 +82,85 @@ def call_openai(prompt: str) -> str:
         "include": ["web_search_call.action.sources"],
         "input": prompt,
     }
-    response = requests.post(
-        "https://api.openai.com/v1/responses",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json=payload,
-        timeout=600,
-    )
-    if not response.ok:
-        raise RuntimeError(f"OpenAI API failed: {response.status_code} {response.text[:2000]}")
-    return extract_response_text(response.json())
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    response_json = create_background_response(payload, headers)
+    response_id = response_json.get("id")
+    if not response_id:
+        raise RuntimeError(f"OpenAI response did not include an id: {response_json}")
+
+    print(f"OpenAI background response started: {response_id} | model={model} | effort={effort}", flush=True)
+    completed = poll_background_response(response_id, headers, poll_timeout_seconds)
+    return extract_response_text(completed)
+
+
+def create_background_response(payload: dict, headers: dict[str, str]) -> dict:
+    last_error: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            response = requests.post(
+                "https://api.openai.com/v1/responses",
+                headers=headers,
+                json=payload,
+                timeout=(30, 120),
+            )
+        except requests.RequestException as exc:
+            last_error = exc
+            wait = attempt * 20
+            print(f"OpenAI create attempt {attempt} failed: {exc}. Retrying in {wait}s.", flush=True)
+            time.sleep(wait)
+            continue
+
+        if response.status_code in {429, 500, 502, 503, 504} and attempt < 3:
+            wait = attempt * 30
+            print(
+                f"OpenAI create attempt {attempt} returned {response.status_code}. Retrying in {wait}s.",
+                flush=True,
+            )
+            time.sleep(wait)
+            continue
+
+        if not response.ok:
+            raise RuntimeError(f"OpenAI API failed: {response.status_code} {response.text[:2000]}")
+        return response.json()
+
+    raise RuntimeError(f"OpenAI create failed after retries: {last_error}")
+
+
+def poll_background_response(response_id: str, headers: dict[str, str], timeout_seconds: int) -> dict:
+    deadline = time.monotonic() + timeout_seconds
+    poll_count = 0
+    while time.monotonic() < deadline:
+        poll_count += 1
+        try:
+            response = requests.get(
+                f"https://api.openai.com/v1/responses/{response_id}",
+                headers=headers,
+                timeout=(30, 120),
+            )
+        except requests.RequestException as exc:
+            print(f"OpenAI poll attempt {poll_count} failed: {exc}. Retrying.", flush=True)
+            time.sleep(15)
+            continue
+
+        if response.status_code in {429, 500, 502, 503, 504}:
+            print(f"OpenAI poll attempt {poll_count} returned {response.status_code}. Retrying.", flush=True)
+            time.sleep(20)
+            continue
+        if not response.ok:
+            raise RuntimeError(f"OpenAI retrieve failed: {response.status_code} {response.text[:2000]}")
+
+        response_json = response.json()
+        status = response_json.get("status")
+        print(f"OpenAI response status: {status}", flush=True)
+        if status == "completed":
+            return response_json
+        if status in {"failed", "cancelled", "incomplete"}:
+            error = response_json.get("error") or response_json.get("incomplete_details") or response_json
+            raise RuntimeError(f"OpenAI response ended with status={status}: {error}")
+
+        time.sleep(20)
+
+    raise TimeoutError(f"OpenAI background response timed out after {timeout_seconds}s: {response_id}")
 
 
 def build_common_context() -> str:

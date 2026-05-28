@@ -19,10 +19,12 @@ env:
 jobs:
   morning-report:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5' }}
-      OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'high' }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.5' }}
+      OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'xhigh' }}
+      OPENAI_BACKGROUND_TIMEOUT_SECONDS: ${{ vars.OPENAI_BACKGROUND_TIMEOUT_SECONDS || '2400' }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       CODEX_NIFTY_INTRADAY_AUTOMATION: ${{ secrets.CODEX_NIFTY_INTRADAY_AUTOMATION }}
