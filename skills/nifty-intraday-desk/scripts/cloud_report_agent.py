@@ -57,8 +57,8 @@ def call_openai(prompt: str) -> str:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is required for cloud automation.")
-    model = os.environ.get("OPENAI_MODEL", "gpt-5.5").strip() or "gpt-5.5"
-    effort = os.environ.get("OPENAI_REASONING_EFFORT", "xhigh").strip() or "xhigh"
+    model = os.environ.get("OPENAI_MODEL", "gpt-5").strip() or "gpt-5"
+    effort = os.environ.get("OPENAI_REASONING_EFFORT", "high").strip() or "high"
     poll_timeout_seconds = int(os.environ.get("OPENAI_BACKGROUND_TIMEOUT_SECONDS", "2400"))
 
     payload = {

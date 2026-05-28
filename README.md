@@ -23,9 +23,11 @@ Do not create one combined multiline secret with all values. GitHub Actions does
 
 Optional repository variables:
 
-- `OPENAI_MODEL`, default `gpt-5.5`
-- `OPENAI_REASONING_EFFORT`, default `xhigh`
+- `OPENAI_MODEL`, default `gpt-5`
+- `OPENAI_REASONING_EFFORT`, default `high`
 - `OPENAI_BACKGROUND_TIMEOUT_SECONDS`, default `2400`
+
+For maximum-quality runs, set `OPENAI_MODEL=gpt-5.5` and `OPENAI_REASONING_EFFORT=xhigh`. This can materially increase cost and runtime.
 
 Daily outputs are expected under:
 
