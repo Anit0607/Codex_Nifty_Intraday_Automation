@@ -52,6 +52,12 @@ Open vs CPR:
 - Open just below BC: cautious bearish.
 - Open well below BC by more than 50 points: strong bearish opening.
 
+Narrow CPR expiry guardrail:
+
+- If CPR width is below 30, the day is expiry-sensitive, and the open is inside CPR, keep the headline close-vs-open bias neutral until price accepts outside CPR or breaks a defined trigger.
+- Do not let prior-day FII/DII buying alone create a constructive headline bias in this setup.
+- Keep direction confidence at or below 60% unless price action, VIX, derivatives, and macro cues align.
+
 ## Gap Classification
 
 - More than +1%: strong gap up.
@@ -74,6 +80,13 @@ Expected intraday range:
 Approx daily range = (VIX / 100) * Nifty level * (1 / sqrt(252)) * 1.5
 Expected range = open +/- approx_daily_range
 ```
+
+Always separate:
+
+- VIX Statistical Range: the wide volatility envelope from the formula.
+- Actionable Desk Range: tighter trigger-based intraday operating range derived from CPR, S/R, round strikes, and opening acceptance.
+
+Do not treat the VIX statistical range as a trade target.
 
 ## Derivatives Logic
 

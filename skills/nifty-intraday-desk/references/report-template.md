@@ -17,6 +17,9 @@ Today's Open: XXXX.XX
 Expected Day Range: XXXX - XXXX
 Expected Range Confidence: XX%
 
+Actionable Desk Range: XXXX - XXXX
+Actionable Range Confidence: XX%
+
 Close vs Open Direction:
 Expected Bias: Close above open / Close below open / Near open
 Direction Confidence: XX%
@@ -212,4 +215,3 @@ BACKTEST:
 ```text
 Backtest Integrity: This analysis was generated using only data available as of/before market open on [date]. The actual [date] closing price and intraday outcome were not referenced.
 ```
-

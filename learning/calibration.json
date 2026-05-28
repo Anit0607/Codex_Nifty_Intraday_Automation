@@ -1,8 +1,8 @@
 {
-  "average_confidence": 66.0,
-  "average_outcome_score": 90.15,
-  "confidence_error": -24.150000000000006,
-  "direction_hit_rate": 100.0,
+  "average_confidence": 67.0,
+  "average_outcome_score": 81.225,
+  "confidence_error": -14.225000000000001,
+  "direction_hit_rate": 50.0,
   "factor_confidence_offsets": {
     "derivatives_logic": 0,
     "global_macro": 0,
@@ -12,20 +12,27 @@
     "vix_volatility": 0
   },
   "failure_tag_counts": {
+    "actionable_range_break": 1,
+    "constructive_bias_miss": 1,
+    "expiry_narrow_cpr_underweighted": 1,
     "hedge_language_not_user_fit": 1,
-    "markov_proxy_incomplete": 1,
-    "range_too_wide": 1,
+    "markov_proxy_incomplete": 2,
+    "range_too_wide": 2,
     "report_visual_density": 1
   },
   "notes": [
     {
       "date": "2026-05-27",
       "note": "Sideways/near-open thesis worked. Range contained but too wide for practical intraday use. Future reports should separate statistical VIX range from actionable desk range and use SL/invalidation-first trader language."
+    },
+    {
+      "date": "2026-05-26",
+      "note": "Close stayed within sideways bucket but below open. Bearish trigger below 23,922 worked and S2/strong support near 23,871-23,885 was almost exactly tagged. Headline bias was too constructive for monthly expiry plus very narrow CPR."
     }
   ],
   "range_containment_rate": 100.0,
-  "sample_count": 1,
+  "sample_count": 2,
   "scenario_hit_rate": 100.0,
-  "updated_at": "2026-05-28T13:16:04.201561+00:00",
+  "updated_at": "2026-05-28T19:07:45.167709+00:00",
   "version": 1
 }
