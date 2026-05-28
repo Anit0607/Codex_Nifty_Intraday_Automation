@@ -6,6 +6,22 @@ Use `config/.env.example` as the template for local delivery secrets. Create `co
 
 GitHub is intended to be the source of truth for the skill, report history, scorecards, and calibration files. The installed local Codex skill lives under `~/.codex/skills/nifty-intraday-desk`; the repository copy lives under `skills/nifty-intraday-desk`.
 
+Cloud automation is provided through GitHub Actions:
+
+- `Nifty 9:20 AM Intraday Report` runs at `03:50 UTC` / `09:20 IST`, Monday-Friday.
+- `Nifty 5 PM Post-Market Tally` runs at `11:30 UTC` / `17:00 IST`, Monday-Friday.
+
+Add these repository secrets before enabling live use:
+
+- `OPENAI_API_KEY`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+
+Optional repository variables:
+
+- `OPENAI_MODEL`, default `gpt-5`
+- `OPENAI_REASONING_EFFORT`, default `high`
+
 Daily outputs are expected under:
 
 - `reports/YYYY-MM-DD/morning-report.md`
