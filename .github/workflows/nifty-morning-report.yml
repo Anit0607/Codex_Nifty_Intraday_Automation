@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 60
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5' }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.5' }}
       OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'high' }}
       OPENAI_BACKGROUND_TIMEOUT_SECONDS: ${{ vars.OPENAI_BACKGROUND_TIMEOUT_SECONDS || '2400' }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -64,6 +64,7 @@ jobs:
 
       - name: Commit generated report
         run: |
+          set +e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports learning || true
@@ -71,5 +72,10 @@ jobs:
             echo "No generated changes to commit."
           else
             git commit -m "Add automated morning report"
+            git pull --rebase origin main
             git push
+            status=$?
+            if [ "$status" -ne 0 ]; then
+              echo "::warning::Report was generated and Telegram delivery already ran, but GitHub artifact push failed."
+            fi
           fi
