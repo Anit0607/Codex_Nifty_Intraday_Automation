@@ -1,0 +1,31 @@
+{
+  "average_confidence": 66.0,
+  "average_outcome_score": 90.15,
+  "confidence_error": -24.150000000000006,
+  "direction_hit_rate": 100.0,
+  "factor_confidence_offsets": {
+    "derivatives_logic": 0,
+    "global_macro": 0,
+    "institutional_flow": 0,
+    "markov_overlay": 0,
+    "price_action_gap": 0,
+    "vix_volatility": 0
+  },
+  "failure_tag_counts": {
+    "hedge_language_not_user_fit": 1,
+    "markov_proxy_incomplete": 1,
+    "range_too_wide": 1,
+    "report_visual_density": 1
+  },
+  "notes": [
+    {
+      "date": "2026-05-27",
+      "note": "Sideways/near-open thesis worked. Range contained but too wide for practical intraday use. Future reports should separate statistical VIX range from actionable desk range and use SL/invalidation-first trader language."
+    }
+  ],
+  "range_containment_rate": 100.0,
+  "sample_count": 1,
+  "scenario_hit_rate": 100.0,
+  "updated_at": "2026-05-28T13:16:04.201561+00:00",
+  "version": 1
+}

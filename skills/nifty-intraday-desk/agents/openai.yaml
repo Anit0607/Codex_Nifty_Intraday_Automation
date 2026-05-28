@@ -1,0 +1,8 @@
+interface:
+  display_name: "Nifty Intraday Desk"
+  short_description: "Nifty intraday reports and audits"
+  default_prompt: "Use $nifty-intraday-desk to generate today's Nifty 50 intraday report with confidence scores."
+
+policy:
+  allow_implicit_invocation: true
+
