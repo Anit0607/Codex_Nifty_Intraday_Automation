@@ -1,8 +1,8 @@
 {
-  "average_confidence": 67.0,
-  "average_outcome_score": 81.225,
-  "confidence_error": -14.225000000000001,
-  "direction_hit_rate": 50.0,
+  "average_confidence": 67.33333333333333,
+  "average_outcome_score": 62.29999999999999,
+  "confidence_error": 5.033333333333331,
+  "direction_hit_rate": 33.333333333333336,
   "factor_confidence_offsets": {
     "derivatives_logic": 0,
     "global_macro": 0,
@@ -13,12 +13,20 @@
   },
   "failure_tag_counts": {
     "actionable_range_break": 1,
+    "actionable_range_low_breach": 1,
     "constructive_bias_miss": 1,
+    "direction_miss": 1,
+    "expected_range_low_breach": 1,
     "expiry_narrow_cpr_underweighted": 1,
     "hedge_language_not_user_fit": 1,
+    "late_session_flow_shock": 1,
     "markov_proxy_incomplete": 2,
+    "narrow_cpr_range_selling_overconfidence": 1,
     "range_too_wide": 2,
-    "report_visual_density": 1
+    "report_visual_density": 1,
+    "sideways_scenario_overweighted": 1,
+    "support_zone_failed": 1,
+    "vix_expansion_underweighted": 1
   },
   "notes": [
     {
@@ -28,11 +36,15 @@
     {
       "date": "2026-05-26",
       "note": "Close stayed within sideways bucket but below open. Bearish trigger below 23,922 worked and S2/strong support near 23,871-23,885 was almost exactly tagged. Headline bias was too constructive for monthly expiry plus very narrow CPR."
+    },
+    {
+      "date": "2026-05-29",
+      "note": "NSE was open on 2026-05-29. Actual Nifty OHLC used: open 23902.15, high 24002.80, low 23484.75, close 23547.75. India VIX post-close public prints were inconsistent around 16.19 to 16.35; tally uses 16.19 as the primary post-close print and records elevated-volatility outcome. Final FII/DII cash data was not reliably available at the 17:00 IST tally boundary and is marked pending. Bounded calibration only: apply a -3 confidence offset to range-selling classifications under very narrow CPR plus V"
     }
   ],
-  "range_containment_rate": 100.0,
-  "sample_count": 2,
-  "scenario_hit_rate": 100.0,
-  "updated_at": "2026-05-28T19:07:45.167709+00:00",
+  "range_containment_rate": 66.66666666666667,
+  "sample_count": 3,
+  "scenario_hit_rate": 66.66666666666667,
+  "updated_at": "2026-05-29T14:19:52.872477+00:00",
   "version": 1
 }
