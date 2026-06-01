@@ -4,6 +4,10 @@
   "actual_low": 23885.45,
   "date": "2026-05-26",
   "direction_hit": false,
+  "expected_high_zone_high": 24383.0,
+  "expected_high_zone_low": 24383.0,
+  "expected_low_zone_high": 23625.0,
+  "expected_low_zone_low": 23625.0,
   "expected_range_high": 24383.0,
   "expected_range_low": 23625.0,
   "failure_tags": [
@@ -11,15 +15,22 @@
     "actionable_range_break",
     "expiry_narrow_cpr_underweighted",
     "range_too_wide",
-    "markov_proxy_incomplete"
+    "markov_proxy_incomplete",
+    "range_precision_miss",
+    "expected_high_miss",
+    "expected_low_miss"
   ],
+  "high_zone_error": 293.2000000000007,
   "key_level_score": 87,
   "leading_scenario": "sideways",
+  "low_zone_error": 260.4500000000007,
   "market_open": true,
   "morning_overall_confidence": 68,
   "notes": "Close stayed within sideways bucket but below open. Bearish trigger below 23,922 worked and S2/strong support near 23,871-23,885 was almost exactly tagged. Headline bias was too constructive for monthly expiry plus very narrow CPR.",
   "predicted_close_vs_open": "near_open_mild_positive_if_24000_holds",
   "range_contained": true,
+  "range_precision_basis": "legacy_expected_range_edges",
+  "range_precision_hit": false,
   "scenario_hit": true,
   "trader_plan_scores": {
     "future_intraday_trader": 80,
@@ -28,4 +39,3 @@
     "option_non_directional_seller": 68
   }
 }
-

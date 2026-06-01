@@ -1,15 +1,17 @@
 {
   "average_confidence": 66.0,
-  "average_outcome_score": 59.62499999999999,
-  "confidence_error": 6.374999999999998,
+  "average_high_zone_error": 268.625,
+  "average_low_zone_error": 186.72500000000036,
+  "average_outcome_score": 44.625,
+  "confidence_error": 21.375,
   "direction_hit_rate": 25.0,
   "factor_confidence_offsets": {
     "derivatives_logic": 0,
     "global_macro": 0,
-    "institutional_flow": 0,
+    "institutional_flow": -1,
     "markov_overlay": 0,
-    "price_action_gap": 0,
-    "vix_volatility": 0
+    "price_action_gap": -1,
+    "vix_volatility": -4
   },
   "failure_tag_counts": {
     "actionable_range_break": 1,
@@ -18,6 +20,8 @@
     "bearish_secondary_scenario_worked": 1,
     "constructive_bias_miss": 1,
     "direction_miss": 1,
+    "expected_high_miss": 4,
+    "expected_low_miss": 4,
     "expected_range_low_breach": 1,
     "expiry_narrow_cpr_underweighted": 1,
     "fii_pressure_materialized": 1,
@@ -27,6 +31,7 @@
     "markov_proxy_incomplete": 2,
     "narrow_cpr_range_selling_overconfidence": 1,
     "near_open_direction_missed": 1,
+    "range_precision_miss": 4,
     "range_too_wide": 2,
     "report_visual_density": 1,
     "s1_support_precision_hit": 1,
@@ -35,14 +40,25 @@
     "support_zone_failed": 1,
     "vix_expansion_underweighted": 1
   },
+  "metric_counts": {
+    "average_confidence": 4,
+    "average_high_zone_error": 4,
+    "average_low_zone_error": 4,
+    "average_outcome_score": 4,
+    "confidence_error": 4,
+    "direction_hit_rate": 4,
+    "range_containment_rate": 4,
+    "range_precision_hit_rate": 4,
+    "scenario_hit_rate": 4
+  },
   "notes": [
-    {
-      "date": "2026-05-27",
-      "note": "Sideways/near-open thesis worked. Range contained but too wide for practical intraday use. Future reports should separate statistical VIX range from actionable desk range and use SL/invalidation-first trader language."
-    },
     {
       "date": "2026-05-26",
       "note": "Close stayed within sideways bucket but below open. Bearish trigger below 23,922 worked and S2/strong support near 23,871-23,885 was almost exactly tagged. Headline bias was too constructive for monthly expiry plus very narrow CPR."
+    },
+    {
+      "date": "2026-05-27",
+      "note": "Sideways/near-open thesis worked. Range contained but too wide for practical intraday use. Future reports should separate statistical VIX range from actionable desk range and use SL/invalidation-first trader language."
     },
     {
       "date": "2026-05-29",
@@ -54,8 +70,9 @@
     }
   ],
   "range_containment_rate": 75.0,
+  "range_precision_hit_rate": 0.0,
   "sample_count": 4,
   "scenario_hit_rate": 50.0,
-  "updated_at": "2026-06-01T17:02:03.557441+00:00",
+  "updated_at": "2026-06-01T19:51:52.093500+00:00",
   "version": 1
 }

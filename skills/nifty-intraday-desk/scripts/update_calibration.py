@@ -16,6 +16,9 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
     "sample_count": 0,
     "direction_hit_rate": None,
     "range_containment_rate": None,
+    "range_precision_hit_rate": None,
+    "average_high_zone_error": None,
+    "average_low_zone_error": None,
     "scenario_hit_rate": None,
     "average_confidence": None,
     "average_outcome_score": None,
@@ -30,6 +33,7 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
     },
     "failure_tag_counts": {},
     "notes": [],
+    "metric_counts": {},
 }
 
 
@@ -51,6 +55,17 @@ def bool_score(value: Any) -> float | None:
     return None
 
 
+def zone_error(actual: Any, low: Any, high: Any) -> float | None:
+    if not all(isinstance(v, (int, float)) and math.isfinite(float(v)) for v in [actual, low, high]):
+        return None
+    actual_f = float(actual)
+    low_f = min(float(low), float(high))
+    high_f = max(float(low), float(high))
+    if low_f <= actual_f <= high_f:
+        return 0.0
+    return min(abs(actual_f - low_f), abs(actual_f - high_f))
+
+
 def mean(values: list[float]) -> float | None:
     clean = [v for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
     if not clean:
@@ -64,6 +79,43 @@ def rolling_average(previous: float | None, count: int, new_value: float | None)
     if previous is None or count <= 0:
         return float(new_value)
     return ((previous * count) + float(new_value)) / (count + 1)
+
+
+def rolling_metric(calibration: dict[str, Any], key: str, new_value: float | None) -> None:
+    if new_value is None:
+        return
+    counts = calibration.setdefault("metric_counts", {})
+    count = int(counts.get(key, 0))
+    previous = calibration.get(key)
+    calibration[key] = rolling_average(previous, count, float(new_value))
+    counts[key] = count + 1
+
+
+def numeric(value: Any) -> float | None:
+    if isinstance(value, (int, float)) and math.isfinite(float(value)):
+        return float(value)
+    return None
+
+
+def normalize_range_precision_fields(scorecard: dict[str, Any]) -> None:
+    """Backfill precision fields for legacy scorecards that had only range edges."""
+    high_low = numeric(scorecard.get("expected_high_zone_low"))
+    high_high = numeric(scorecard.get("expected_high_zone_high"))
+    low_low = numeric(scorecard.get("expected_low_zone_low"))
+    low_high = numeric(scorecard.get("expected_low_zone_high"))
+    if high_low is not None and high_high is not None and low_low is not None and low_high is not None:
+        return
+
+    legacy_low = numeric(scorecard.get("expected_range_low"))
+    legacy_high = numeric(scorecard.get("expected_range_high"))
+    if legacy_low is None or legacy_high is None:
+        return
+
+    scorecard.setdefault("expected_high_zone_low", legacy_high)
+    scorecard.setdefault("expected_high_zone_high", legacy_high)
+    scorecard.setdefault("expected_low_zone_low", legacy_low)
+    scorecard.setdefault("expected_low_zone_high", legacy_low)
+    scorecard.setdefault("range_precision_basis", "legacy_expected_range_edges")
 
 
 def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outcome_score: float | None) -> None:
@@ -81,10 +133,14 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
     tags = set(scorecard.get("failure_tags") or [])
     mapping = {
         "gap_misread": "price_action_gap",
+        "gap_up_failed": "price_action_gap",
         "vix_misread": "vix_volatility",
+        "vix_expansion_underweighted": "vix_volatility",
+        "range_precision_miss": "vix_volatility",
         "option_chain_misread": "derivatives_logic",
         "global_cue_misread": "global_macro",
         "fii_dii_misread": "institutional_flow",
+        "fii_pressure_materialized": "institutional_flow",
         "markov_misread": "markov_overlay",
     }
     offsets = calibration.setdefault("factor_confidence_offsets", {})
@@ -93,20 +149,42 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
             offsets[factor] = int(clamp(int(offsets.get(factor, 0)) + step, -10, 10))
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Update Nifty desk calibration from a scorecard.")
-    parser.add_argument("--scorecard", required=True, help="Path to learning/scorecards/YYYY-MM-DD.json")
-    parser.add_argument("--calibration", default="learning/calibration.json", help="Calibration JSON path.")
-    args = parser.parse_args()
-
-    scorecard_path = Path(args.scorecard)
-    calibration_path = Path(args.calibration)
+def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[str, Any]:
     scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
-    calibration = load_json(calibration_path, DEFAULT_CALIBRATION)
-
+    normalize_range_precision_fields(scorecard)
     count = int(calibration.get("sample_count") or 0)
     direction_score = bool_score(scorecard.get("direction_hit"))
     range_score = bool_score(scorecard.get("range_contained"))
+    high_error = zone_error(
+        scorecard.get("actual_high"),
+        scorecard.get("expected_high_zone_low"),
+        scorecard.get("expected_high_zone_high"),
+    )
+    low_error = zone_error(
+        scorecard.get("actual_low"),
+        scorecard.get("expected_low_zone_low"),
+        scorecard.get("expected_low_zone_high"),
+    )
+    if high_error is not None:
+        scorecard["high_zone_error"] = high_error
+    if low_error is not None:
+        scorecard["low_zone_error"] = low_error
+
+    range_precision = scorecard.get("range_precision_hit")
+    if not isinstance(range_precision, bool) and high_error is not None and low_error is not None:
+        range_precision = high_error <= 50.0 and low_error <= 50.0
+        scorecard["range_precision_hit"] = bool(range_precision)
+
+    if range_precision is False:
+        tags = scorecard.setdefault("failure_tags", [])
+        if "range_precision_miss" not in tags:
+            tags.append("range_precision_miss")
+        if high_error is not None and high_error > 50 and "expected_high_miss" not in tags:
+            tags.append("expected_high_miss")
+        if low_error is not None and low_error > 50 and "expected_low_miss" not in tags:
+            tags.append("expected_low_miss")
+
+    range_precision_score = bool_score(range_precision)
     scenario_score = bool_score(scorecard.get("scenario_hit"))
     key_level_score = scorecard.get("key_level_score")
     trader_scores = scorecard.get("trader_plan_scores") or {}
@@ -116,7 +194,7 @@ def main() -> int:
             v
             for v in [
                 direction_score,
-                range_score,
+                range_precision_score if range_precision_score is not None else range_score,
                 scenario_score,
                 float(key_level_score) if isinstance(key_level_score, (int, float)) else None,
                 mean([float(v) for v in trader_scores.values() if isinstance(v, (int, float))]),
@@ -128,19 +206,16 @@ def main() -> int:
     confidence = scorecard.get("morning_overall_confidence")
     confidence_value = float(confidence) if isinstance(confidence, (int, float)) else None
 
-    calibration["direction_hit_rate"] = rolling_average(calibration.get("direction_hit_rate"), count, direction_score)
-    calibration["range_containment_rate"] = rolling_average(
-        calibration.get("range_containment_rate"), count, range_score
-    )
-    calibration["scenario_hit_rate"] = rolling_average(calibration.get("scenario_hit_rate"), count, scenario_score)
-    calibration["average_confidence"] = rolling_average(calibration.get("average_confidence"), count, confidence_value)
-    calibration["average_outcome_score"] = rolling_average(
-        calibration.get("average_outcome_score"), count, outcome_score
-    )
+    rolling_metric(calibration, "direction_hit_rate", direction_score)
+    rolling_metric(calibration, "range_containment_rate", range_score)
+    rolling_metric(calibration, "range_precision_hit_rate", range_precision_score)
+    rolling_metric(calibration, "average_high_zone_error", high_error)
+    rolling_metric(calibration, "average_low_zone_error", low_error)
+    rolling_metric(calibration, "scenario_hit_rate", scenario_score)
+    rolling_metric(calibration, "average_confidence", confidence_value)
+    rolling_metric(calibration, "average_outcome_score", outcome_score)
     if confidence_value is not None and outcome_score is not None:
-        calibration["confidence_error"] = rolling_average(
-            calibration.get("confidence_error"), count, confidence_value - outcome_score
-        )
+        rolling_metric(calibration, "confidence_error", confidence_value - outcome_score)
 
     failure_counts = calibration.setdefault("failure_tag_counts", {})
     for tag in scorecard.get("failure_tags") or []:
@@ -148,13 +223,36 @@ def main() -> int:
 
     update_offsets(calibration, scorecard, outcome_score)
     calibration["sample_count"] = count + 1
-    calibration["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     notes = calibration.setdefault("notes", [])
     note = scorecard.get("notes")
     if note:
         notes.append({"date": scorecard.get("date"), "note": str(note)[:500]})
         calibration["notes"] = notes[-30:]
+
+    scorecard_path.write_text(json.dumps(scorecard, indent=2, sort_keys=True), encoding="utf-8")
+    return calibration
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Update Nifty desk calibration from a scorecard.")
+    parser.add_argument("--scorecard", help="Path to learning/scorecards/YYYY-MM-DD.json")
+    parser.add_argument("--rebuild-dir", help="Rebuild calibration from all JSON scorecards in this directory.")
+    parser.add_argument("--calibration", default="learning/calibration.json", help="Calibration JSON path.")
+    args = parser.parse_args()
+
+    calibration_path = Path(args.calibration)
+    if args.rebuild_dir:
+        calibration = json.loads(json.dumps(DEFAULT_CALIBRATION))
+        for path in sorted(Path(args.rebuild_dir).glob("*.json")):
+            calibration = apply_scorecard(calibration, path)
+    elif args.scorecard:
+        calibration = load_json(calibration_path, DEFAULT_CALIBRATION)
+        calibration = apply_scorecard(calibration, Path(args.scorecard))
+    else:
+        parser.error("Either --scorecard or --rebuild-dir is required.")
+
+    calibration["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     calibration_path.parent.mkdir(parents=True, exist_ok=True)
     calibration_path.write_text(json.dumps(calibration, indent=2, sort_keys=True), encoding="utf-8")
@@ -165,4 +263,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

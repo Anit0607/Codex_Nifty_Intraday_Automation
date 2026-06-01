@@ -74,19 +74,36 @@ Narrow CPR expiry guardrail:
 - `20-25`: high, volatile.
 - `> 25`: extreme, expert-only.
 
-Expected intraday range:
+VIX risk envelope:
 
 ```text
 Approx daily range = (VIX / 100) * Nifty level * (1 / sqrt(252)) * 1.5
-Expected range = open +/- approx_daily_range
+VIX risk envelope = open +/- approx_daily_range
 ```
 
 Always separate:
 
-- VIX Statistical Range: the wide volatility envelope from the formula.
+- VIX Risk Envelope: the wide volatility envelope from the formula. It is for risk awareness, not the primary tradable high/low forecast.
+- Primary Expected Day Range: the practical forecast range built from Expected Low Zone to Expected High Zone. This is the range the evening tally must judge against the +/-50 point tolerance.
 - Actionable Desk Range: tighter trigger-based intraday operating range derived from CPR, S/R, round strikes, and opening acceptance.
+- Expected High Zone: most likely day-high area, usually a 40-80 point band built from CPR, R1/R2, previous high, option resistance, and round numbers.
+- Expected Low Zone: most likely day-low area, usually a 40-80 point band built from CPR, S1/S2, previous low, option support, and round numbers.
+- Tail Expansion Zones: upside/downside extension targets if the primary range fails.
 
-Do not treat the VIX statistical range as a trade target.
+Do not label the VIX risk envelope as "Expected Day Range." The report header's Expected Day Range must be the primary forecast range, not the wide VIX envelope.
+
+Range precision rule:
+
+- The evening tally must score expected high and expected low separately.
+- A high/low zone is acceptable only if the actual high/low is inside the zone or within 50 points of the nearest zone edge.
+- If either side misses by more than 50 points, mark `range_precision_hit=false` even if the broad VIX range contained the day.
+- Range containment is not a model success by itself; it only means the risk envelope was wide enough.
+
+Range construction guardrails:
+
+- On gap-up opens inside or below wide CPR after heavy FII selling, do not project expected high to the VIX upper envelope. Cap expected high near CPR upper/R1/previous high until price accepts above it.
+- On failed gap-up risk days, expected low must include S1/prior low and a tail zone toward S2 if support breaks.
+- If VIX is elevated and the prior day was a large selloff, widen the low-side tail before widening the upside target unless global and institutional evidence are strongly risk-on.
 
 ## Derivatives Logic
 
@@ -150,6 +167,11 @@ Use Markov regime overlay as a calibration layer:
 - Bear persistence supports downside.
 - Sideways persistence supports range.
 - Mixed transition matrix lowers confidence.
+
+Downside weighting guardrail:
+
+- If the prior day was a large red candle, FIIs were heavy sellers, VIX is above 16 or rising, and the current open is a gap-up inside/wide CPR, do not let sideways probability dominate by default.
+- In that setup, bearish probability should be at least equal to sideways unless price reclaims and holds CPR upper/R1 with VIX cooling.
 
 ## Confidence Scores
 

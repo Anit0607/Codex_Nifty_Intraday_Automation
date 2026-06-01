@@ -14,11 +14,19 @@ Reference Prices:
 Previous Close: XXXX.XX
 Today's Open: XXXX.XX
 
+VIX Risk Envelope: XXXX - XXXX
+VIX Envelope Confidence: XX%
+
 Expected Day Range: XXXX - XXXX
 Expected Range Confidence: XX%
 
 Actionable Desk Range: XXXX - XXXX
 Actionable Range Confidence: XX%
+
+Expected High Zone: XXXX - XXXX
+Expected Low Zone: XXXX - XXXX
+Tail Expansion Zones: Upside XXXX - XXXX / Downside XXXX - XXXX
+Range Precision Confidence: XX%
 
 Close vs Open Direction:
 Expected Bias: Close above open / Close below open / Near open
@@ -54,7 +62,11 @@ Previous Day Low | |
 Previous Day Close | |
 Breakout Level | |
 Breakdown Level | |
-Expected Intraday Range | |
+VIX Risk Envelope | |
+Primary Expected Day Range | |
+Expected High Zone | |
+Expected Low Zone | |
+Tail Expansion Zones | |
 R1 | |
 R2 | |
 S1 | |
