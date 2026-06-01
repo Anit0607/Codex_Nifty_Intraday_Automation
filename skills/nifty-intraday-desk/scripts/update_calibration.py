@@ -101,6 +101,58 @@ def numeric(value: Any) -> float | None:
     return None
 
 
+def normalized_direction(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    clean = value.strip().lower().replace("-", "_").replace(" ", "_")
+    if not clean:
+        return None
+    if "near" in clean or "flat" in clean or "neutral" in clean or "conditional" in clean:
+        return None
+    if "above" in clean or "higher" in clean or "positive" in clean or "up" in clean:
+        return "above_open"
+    if "below" in clean or "lower" in clean or "negative" in clean or "down" in clean:
+        return "below_open"
+    return None
+
+
+def actual_direction(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    clean = value.strip().lower().replace("-", "_").replace(" ", "_")
+    if "above" in clean or "higher" in clean or "positive" in clean or "up" in clean:
+        return "above_open"
+    if "below" in clean or "lower" in clean or "negative" in clean or "down" in clean:
+        return "below_open"
+    return None
+
+
+def normalize_binary_direction(scorecard: dict[str, Any]) -> float | None:
+    predicted_raw = scorecard.get("predicted_close_vs_open")
+    actual_raw = scorecard.get("actual_close_vs_open")
+    predicted = normalized_direction(predicted_raw)
+    actual = actual_direction(actual_raw)
+
+    if actual is not None:
+        scorecard["actual_close_vs_open"] = actual
+
+    if predicted is None:
+        tags = scorecard.setdefault("failure_tags", [])
+        if "non_binary_direction_forecast" not in tags:
+            tags.append("non_binary_direction_forecast")
+        scorecard["direction_hit"] = False
+        scorecard.setdefault("direction_precision_basis", "legacy_non_binary_forecast")
+        return 0.0
+
+    scorecard["predicted_close_vs_open"] = predicted
+    if actual is None:
+        return bool_score(scorecard.get("direction_hit"))
+
+    hit = predicted == actual
+    scorecard["direction_hit"] = hit
+    return bool_score(hit)
+
+
 def normalize_range_precision_fields(scorecard: dict[str, Any]) -> None:
     """Backfill precision fields for legacy scorecards that had only range edges."""
     high_low = numeric(scorecard.get("expected_high_zone_low"))
@@ -138,6 +190,7 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
     mapping = {
         "gap_misread": "price_action_gap",
         "gap_up_failed": "price_action_gap",
+        "non_binary_direction_forecast": "price_action_gap",
         "vix_misread": "vix_volatility",
         "vix_expansion_underweighted": "vix_volatility",
         "range_precision_miss": "vix_volatility",
@@ -158,7 +211,7 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
     normalize_range_precision_fields(scorecard)
     count = int(calibration.get("sample_count") or 0)
-    direction_score = bool_score(scorecard.get("direction_hit"))
+    direction_score = normalize_binary_direction(scorecard)
     range_score = bool_score(scorecard.get("range_contained"))
     high_error = zone_error(
         scorecard.get("actual_high"),

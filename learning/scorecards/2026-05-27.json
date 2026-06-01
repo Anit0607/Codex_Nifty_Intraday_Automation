@@ -1,9 +1,10 @@
 {
-  "actual_close_vs_open": "above_open_near_open",
+  "actual_close_vs_open": "above_open",
   "actual_high": 23983.2,
   "actual_low": 23858.25,
   "date": "2026-05-27",
-  "direction_hit": true,
+  "direction_hit": false,
+  "direction_precision_basis": "legacy_non_binary_forecast",
   "expected_high_zone_high": 24244.0,
   "expected_high_zone_low": 24244.0,
   "expected_low_zone_high": 23516.0,
@@ -17,7 +18,8 @@
     "report_visual_density",
     "range_precision_miss",
     "expected_high_miss",
-    "expected_low_miss"
+    "expected_low_miss",
+    "non_binary_direction_forecast"
   ],
   "high_zone_error": 260.7999999999993,
   "key_level_score": 86,

@@ -203,6 +203,11 @@ Critical range requirement:
 - Do not include "Actionable Desk Range" in new morning reports. Use Opening Execution Map instead: No-Trade/Chop Zone, Long Trigger with SL/targets, Short Trigger with SL/targets, and Execution Confidence.
 - If uncertainty is high, widen the high/low zones honestly and lower confidence; do not hide uncertainty inside the VIX envelope.
 
+Critical direction requirement:
+- Close vs Open Direction must be binary only: Close above open or Close below open.
+- Do not use near open, flat, neutral, conditional range, or similar wording in that field.
+- If evidence is mixed, still choose above or below and lower Direction Confidence.
+
 Important output requirement:
 Return only Markdown for the file. Do not wrap the report in code fences.
 
@@ -243,6 +248,7 @@ Output exactly two blocks:
 </SCORECARD_JSON>
 
 Scorecard requirements:
+- predicted_close_vs_open and actual_close_vs_open must be normalized to above_open or below_open only. Do not use near_open.
 - Include expected_high_zone_low, expected_high_zone_high, expected_low_zone_low, expected_low_zone_high.
 - Include high_zone_error and low_zone_error if calculable.
 - If the morning report has only a legacy Expected Day Range and no high/low zones, treat the high edge and low edge as legacy high/low zone forecasts and score them against the +/-50 point tolerance.

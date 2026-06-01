@@ -32,7 +32,7 @@ Short Trigger: Below XXXX, SL XXXX, targets XXXX / XXXX
 Execution Confidence: XX%
 
 Close vs Open Direction:
-Expected Bias: Close above open / Close below open / Near open
+Expected Direction: Close above open / Close below open
 Direction Confidence: XX%
 
 Overall Report Confidence: XX%

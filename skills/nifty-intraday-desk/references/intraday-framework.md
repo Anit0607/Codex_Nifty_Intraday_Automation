@@ -54,7 +54,7 @@ Open vs CPR:
 
 Narrow CPR expiry guardrail:
 
-- If CPR width is below 30, the day is expiry-sensitive, and the open is inside CPR, keep the headline close-vs-open bias neutral until price accepts outside CPR or breaks a defined trigger.
+- If CPR width is below 30, the day is expiry-sensitive, and the open is inside CPR, keep close-vs-open confidence low until price accepts outside CPR or breaks a defined trigger.
 - Do not let prior-day FII/DII buying alone create a constructive headline bias in this setup.
 - Keep direction confidence at or below 60% unless price action, VIX, derivatives, and macro cues align.
 
@@ -162,6 +162,14 @@ Convert evidence into:
 - Upside probability: close higher than current day open.
 - Downside probability: close lower than current day open.
 - Sideways probability: close within about +/-0.4% to 0.5% of current day open.
+
+Binary close-vs-open rule:
+
+- The header must always make one black-and-white close direction call: `Close above open` or `Close below open`.
+- Never write `near open`, `flat`, `conditional range`, `neutral`, or similar language in the Close vs Open Direction field.
+- If the leading market-behaviour scenario is sideways, still choose the binary direction from the stronger weighted evidence between upside and downside.
+- If evidence is almost balanced, choose the side with the larger Upside/Downside probability and reduce Direction Confidence. If upside and downside are exactly tied, use price action/gap plus VIX as the tie-breaker.
+- Sideways probability may remain in the probability model as a range-behaviour classification, but it is not an allowed close direction.
 
 Use Markov regime overlay as a calibration layer:
 

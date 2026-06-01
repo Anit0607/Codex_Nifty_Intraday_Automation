@@ -74,6 +74,7 @@ Allowed automatic changes:
 
 - Update rolling hit rates.
 - Update average confidence error.
+- Treat close-vs-open direction as binary only. `predicted_close_vs_open` and `actual_close_vs_open` must be `above_open` or `below_open`; legacy `near_open` forecasts should be tagged `non_binary_direction_forecast` and must not be counted as a clean direction hit.
 - Update high/low range precision hit rate.
 - Add range miss tags when actual high/low misses the expected high/low zone by more than 50 points.
 - For older morning reports that did not contain explicit high/low zones, score the legacy Expected Day Range edges as legacy high/low forecasts so prior misses are not incorrectly treated as success.

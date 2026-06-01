@@ -4,6 +4,7 @@
   "actual_low": 23357.95,
   "date": "2026-06-01",
   "direction_hit": false,
+  "direction_precision_basis": "legacy_non_binary_forecast",
   "expected_high_zone_high": 24016.0,
   "expected_high_zone_low": 24016.0,
   "expected_low_zone_high": 23293.0,
@@ -21,7 +22,8 @@
     "range_precision_miss",
     "expected_high_miss",
     "expected_low_miss",
-    "legacy_actionable_range_miss"
+    "legacy_actionable_range_miss",
+    "non_binary_direction_forecast"
   ],
   "high_zone_error": 282.2999999999993,
   "key_level_score": 86.0,
