@@ -20,13 +20,16 @@ VIX Envelope Confidence: XX%
 Expected Day Range: XXXX - XXXX
 Expected Range Confidence: XX%
 
-Actionable Desk Range: XXXX - XXXX
-Actionable Range Confidence: XX%
-
 Expected High Zone: XXXX - XXXX
 Expected Low Zone: XXXX - XXXX
 Tail Expansion Zones: Upside XXXX - XXXX / Downside XXXX - XXXX
 Range Precision Confidence: XX%
+
+Opening Execution Map:
+No-Trade / Chop Zone: XXXX - XXXX
+Long Trigger: Above XXXX, SL XXXX, targets XXXX / XXXX
+Short Trigger: Below XXXX, SL XXXX, targets XXXX / XXXX
+Execution Confidence: XX%
 
 Close vs Open Direction:
 Expected Bias: Close above open / Close below open / Near open

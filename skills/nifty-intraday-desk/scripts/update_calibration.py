@@ -19,6 +19,10 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
     "range_precision_hit_rate": None,
     "average_high_zone_error": None,
     "average_low_zone_error": None,
+    "legacy_actionable_range_hit_rate": None,
+    "average_legacy_actionable_high_error": None,
+    "average_legacy_actionable_low_error": None,
+    "average_execution_trigger_score": None,
     "scenario_hit_rate": None,
     "average_confidence": None,
     "average_outcome_score": None,
@@ -137,6 +141,7 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
         "vix_misread": "vix_volatility",
         "vix_expansion_underweighted": "vix_volatility",
         "range_precision_miss": "vix_volatility",
+        "legacy_actionable_range_miss": "price_action_gap",
         "option_chain_misread": "derivatives_logic",
         "global_cue_misread": "global_macro",
         "fii_dii_misread": "institutional_flow",
@@ -184,9 +189,38 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
         if low_error is not None and low_error > 50 and "expected_low_miss" not in tags:
             tags.append("expected_low_miss")
 
+    legacy_actionable_high_error = zone_error(
+        scorecard.get("actual_high"),
+        scorecard.get("legacy_actionable_range_high"),
+        scorecard.get("legacy_actionable_range_high"),
+    )
+    legacy_actionable_low_error = zone_error(
+        scorecard.get("actual_low"),
+        scorecard.get("legacy_actionable_range_low"),
+        scorecard.get("legacy_actionable_range_low"),
+    )
+    legacy_actionable_hit = scorecard.get("legacy_actionable_range_hit")
+    if legacy_actionable_high_error is not None:
+        scorecard["legacy_actionable_high_error"] = legacy_actionable_high_error
+    if legacy_actionable_low_error is not None:
+        scorecard["legacy_actionable_low_error"] = legacy_actionable_low_error
+    if (
+        not isinstance(legacy_actionable_hit, bool)
+        and legacy_actionable_high_error is not None
+        and legacy_actionable_low_error is not None
+    ):
+        legacy_actionable_hit = legacy_actionable_high_error <= 50.0 and legacy_actionable_low_error <= 50.0
+        scorecard["legacy_actionable_range_hit"] = bool(legacy_actionable_hit)
+    if legacy_actionable_hit is False:
+        tags = scorecard.setdefault("failure_tags", [])
+        if "legacy_actionable_range_miss" not in tags:
+            tags.append("legacy_actionable_range_miss")
+
     range_precision_score = bool_score(range_precision)
+    legacy_actionable_score = bool_score(legacy_actionable_hit)
     scenario_score = bool_score(scorecard.get("scenario_hit"))
     key_level_score = scorecard.get("key_level_score")
+    execution_trigger_score = scorecard.get("execution_trigger_score")
     trader_scores = scorecard.get("trader_plan_scores") or {}
 
     outcome_score = mean(
@@ -211,6 +245,14 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     rolling_metric(calibration, "range_precision_hit_rate", range_precision_score)
     rolling_metric(calibration, "average_high_zone_error", high_error)
     rolling_metric(calibration, "average_low_zone_error", low_error)
+    rolling_metric(calibration, "legacy_actionable_range_hit_rate", legacy_actionable_score)
+    rolling_metric(calibration, "average_legacy_actionable_high_error", legacy_actionable_high_error)
+    rolling_metric(calibration, "average_legacy_actionable_low_error", legacy_actionable_low_error)
+    rolling_metric(
+        calibration,
+        "average_execution_trigger_score",
+        float(execution_trigger_score) if isinstance(execution_trigger_score, (int, float)) else None,
+    )
     rolling_metric(calibration, "scenario_hit_rate", scenario_score)
     rolling_metric(calibration, "average_confidence", confidence_value)
     rolling_metric(calibration, "average_outcome_score", outcome_score)

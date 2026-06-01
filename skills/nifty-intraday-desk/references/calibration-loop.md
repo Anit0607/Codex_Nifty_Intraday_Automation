@@ -30,6 +30,12 @@ Create `learning/scorecards/YYYY-MM-DD.json`:
   "high_zone_error": 0.0,
   "low_zone_error": 0.0,
   "range_precision_hit": true,
+  "legacy_actionable_range_low": 0.0,
+  "legacy_actionable_range_high": 0.0,
+  "legacy_actionable_low_error": 0.0,
+  "legacy_actionable_high_error": 0.0,
+  "legacy_actionable_range_hit": false,
+  "execution_trigger_score": 0.0,
   "leading_scenario": "bullish",
   "scenario_hit": true,
   "key_level_score": 0.0,
@@ -54,6 +60,7 @@ Score each section from 0 to 100:
 - VIX risk envelope containment.
 - Primary expected day range.
 - Expected high/low zone precision.
+- Opening execution map trigger quality.
 - Close vs open direction.
 - Probability model.
 - Factor scoring.
@@ -70,6 +77,7 @@ Allowed automatic changes:
 - Update high/low range precision hit rate.
 - Add range miss tags when actual high/low misses the expected high/low zone by more than 50 points.
 - For older morning reports that did not contain explicit high/low zones, score the legacy Expected Day Range edges as legacy high/low forecasts so prior misses are not incorrectly treated as success.
+- Score old `Actionable Desk Range` fields only as legacy diagnostics. If the actual high/low misses either edge by more than 50 points, add `legacy_actionable_range_miss`. New reports should use Opening Execution Map instead.
 - Add failure tags.
 - Add source reliability notes.
 - Adjust confidence offsets by no more than 3 percentage points per day.

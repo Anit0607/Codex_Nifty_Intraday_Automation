@@ -197,9 +197,10 @@ template. Include clickable source links in a Sources section at the end.
 
 Critical range requirement:
 - Do not present the VIX statistical envelope as the tradable Expected Day Range.
-- In the header, include VIX Risk Envelope, Expected Day Range, Actionable Desk Range, Expected High Zone, Expected Low Zone, Tail Expansion Zones, and Range Precision Confidence.
+- In the header, include VIX Risk Envelope, Expected Day Range, Expected High Zone, Expected Low Zone, Tail Expansion Zones, Range Precision Confidence, and Opening Execution Map.
 - Expected Day Range is the primary practical forecast range derived from Expected Low Zone and Expected High Zone, not the VIX envelope.
 - Expected High Zone and Expected Low Zone are the primary high/low forecast and should target practical precision, normally within about +/-50 points of actual if the model is good.
+- Do not include "Actionable Desk Range" in new morning reports. Use Opening Execution Map instead: No-Trade/Chop Zone, Long Trigger with SL/targets, Short Trigger with SL/targets, and Execution Confidence.
 - If uncertainty is high, widen the high/low zones honestly and lower confidence; do not hide uncertainty inside the VIX envelope.
 
 Important output requirement:
@@ -245,6 +246,7 @@ Scorecard requirements:
 - Include expected_high_zone_low, expected_high_zone_high, expected_low_zone_low, expected_low_zone_high.
 - Include high_zone_error and low_zone_error if calculable.
 - If the morning report has only a legacy Expected Day Range and no high/low zones, treat the high edge and low edge as legacy high/low zone forecasts and score them against the +/-50 point tolerance.
+- If the morning report contains a legacy Actionable Desk Range, score it separately as legacy_actionable_range_hit using the same +/-50 edge tolerance, add legacy_actionable_range_miss when it fails, and do not let it override the primary Expected Day Range score.
 - Set range_precision_hit=false if actual high or low misses the expected zone by more than 50 points.
 - Do not treat range_contained=true as sufficient success when range_precision_hit=false.
 - Add failure tags expected_high_miss, expected_low_miss, and range_precision_miss when applicable.

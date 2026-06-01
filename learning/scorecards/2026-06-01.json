@@ -20,11 +20,17 @@
     "fii_pressure_materialized",
     "range_precision_miss",
     "expected_high_miss",
-    "expected_low_miss"
+    "expected_low_miss",
+    "legacy_actionable_range_miss"
   ],
   "high_zone_error": 282.2999999999993,
   "key_level_score": 86.0,
   "leading_scenario": "sideways",
+  "legacy_actionable_high_error": 146.29999999999927,
+  "legacy_actionable_low_error": 122.04999999999927,
+  "legacy_actionable_range_high": 23880.0,
+  "legacy_actionable_range_hit": false,
+  "legacy_actionable_range_low": 23480.0,
   "low_zone_error": 64.95000000000073,
   "market_open": true,
   "morning_overall_confidence": 62,

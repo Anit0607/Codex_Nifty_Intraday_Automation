@@ -1,6 +1,9 @@
 {
   "average_confidence": 66.0,
+  "average_execution_trigger_score": null,
   "average_high_zone_error": 268.625,
+  "average_legacy_actionable_high_error": 76.23333333333358,
+  "average_legacy_actionable_low_error": 167.28333333333285,
   "average_low_zone_error": 186.72500000000036,
   "average_outcome_score": 44.625,
   "confidence_error": 21.375,
@@ -10,7 +13,7 @@
     "global_macro": 0,
     "institutional_flow": -1,
     "markov_overlay": 0,
-    "price_action_gap": -1,
+    "price_action_gap": -4,
     "vix_volatility": -4
   },
   "failure_tag_counts": {
@@ -28,6 +31,7 @@
     "gap_up_failed": 1,
     "hedge_language_not_user_fit": 1,
     "late_session_flow_shock": 1,
+    "legacy_actionable_range_miss": 3,
     "markov_proxy_incomplete": 2,
     "narrow_cpr_range_selling_overconfidence": 1,
     "near_open_direction_missed": 1,
@@ -40,13 +44,17 @@
     "support_zone_failed": 1,
     "vix_expansion_underweighted": 1
   },
+  "legacy_actionable_range_hit_rate": 0.0,
   "metric_counts": {
     "average_confidence": 4,
     "average_high_zone_error": 4,
+    "average_legacy_actionable_high_error": 3,
+    "average_legacy_actionable_low_error": 3,
     "average_low_zone_error": 4,
     "average_outcome_score": 4,
     "confidence_error": 4,
     "direction_hit_rate": 4,
+    "legacy_actionable_range_hit_rate": 3,
     "range_containment_rate": 4,
     "range_precision_hit_rate": 4,
     "scenario_hit_rate": 4
@@ -73,6 +81,6 @@
   "range_precision_hit_rate": 0.0,
   "sample_count": 4,
   "scenario_hit_rate": 50.0,
-  "updated_at": "2026-06-01T19:51:52.093500+00:00",
+  "updated_at": "2026-06-01T19:58:51.213071+00:00",
   "version": 1
 }

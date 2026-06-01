@@ -85,12 +85,13 @@ Always separate:
 
 - VIX Risk Envelope: the wide volatility envelope from the formula. It is for risk awareness, not the primary tradable high/low forecast.
 - Primary Expected Day Range: the practical forecast range built from Expected Low Zone to Expected High Zone. This is the range the evening tally must judge against the +/-50 point tolerance.
-- Actionable Desk Range: tighter trigger-based intraday operating range derived from CPR, S/R, round strikes, and opening acceptance.
 - Expected High Zone: most likely day-high area, usually a 40-80 point band built from CPR, R1/R2, previous high, option resistance, and round numbers.
 - Expected Low Zone: most likely day-low area, usually a 40-80 point band built from CPR, S1/S2, previous low, option support, and round numbers.
 - Tail Expansion Zones: upside/downside extension targets if the primary range fails.
+- Opening Execution Map: trigger-based trading plan with no-trade/chop zone, long trigger, short trigger, stop-loss logic, and targets.
 
 Do not label the VIX risk envelope as "Expected Day Range." The report header's Expected Day Range must be the primary forecast range, not the wide VIX envelope.
+Do not use the phrase "Actionable Desk Range" in new reports. It was too easy to confuse with a second day high/low forecast. Execution guidance must be expressed as triggers and invalidations, not as another range to predict the full day's extremes.
 
 Range precision rule:
 
@@ -98,6 +99,7 @@ Range precision rule:
 - A high/low zone is acceptable only if the actual high/low is inside the zone or within 50 points of the nearest zone edge.
 - If either side misses by more than 50 points, mark `range_precision_hit=false` even if the broad VIX range contained the day.
 - Range containment is not a model success by itself; it only means the risk envelope was wide enough.
+- Legacy Actionable Desk Range precision must be audited separately when it appears in older reports. Treat its lower edge as a low forecast and upper edge as a high forecast; if either edge misses actual low/high by more than 50 points, tag `legacy_actionable_range_miss`. Do not promote it back into the report unless repeated evidence supports it.
 
 Range construction guardrails:
 

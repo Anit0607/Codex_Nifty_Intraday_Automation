@@ -18,11 +18,17 @@
     "markov_proxy_incomplete",
     "range_precision_miss",
     "expected_high_miss",
-    "expected_low_miss"
+    "expected_low_miss",
+    "legacy_actionable_range_miss"
   ],
   "high_zone_error": 293.2000000000007,
   "key_level_score": 87,
   "leading_scenario": "sideways",
+  "legacy_actionable_high_error": 45.20000000000073,
+  "legacy_actionable_low_error": 64.54999999999927,
+  "legacy_actionable_range_high": 24135.0,
+  "legacy_actionable_range_hit": false,
+  "legacy_actionable_range_low": 23950.0,
   "low_zone_error": 260.4500000000007,
   "market_open": true,
   "morning_overall_confidence": 68,
