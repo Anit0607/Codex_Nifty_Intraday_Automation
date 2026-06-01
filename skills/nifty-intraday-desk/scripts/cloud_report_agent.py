@@ -210,6 +210,8 @@ Critical direction requirement:
 
 Important output requirement:
 Return only Markdown for the file. Do not wrap the report in code fences.
+After the header's Overall Report Confidence line, go directly to ## 1. Market Summary.
+Do not include a Data boundary note, Reference note, or extra data-boundary paragraph.
 
 {build_common_context()}
 """.strip()

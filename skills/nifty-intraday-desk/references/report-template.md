@@ -38,6 +38,10 @@ Direction Confidence: XX%
 Overall Report Confidence: XX%
 ```
 
+After `Overall Report Confidence`, go directly to `## 1. Market Summary`.
+Do not add a `Data boundary note`, `Reference note`, or any extra explanatory
+paragraph between the header and Section 1.
+
 ## 1. Market Summary
 
 Maximum five lines. Include opening character, CPR position, VIX tone, probable behaviour, main directional risk, and whether the day favours trend/range/conditional breakout.
