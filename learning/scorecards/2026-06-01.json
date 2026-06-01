@@ -1,0 +1,32 @@
+{
+  "actual_close_vs_open": "below_open",
+  "actual_high": 23733.7,
+  "actual_low": 23357.95,
+  "date": "2026-06-01",
+  "direction_hit": false,
+  "expected_range_high": 24016.0,
+  "expected_range_low": 23293.0,
+  "failure_tags": [
+    "sideways_leading_scenario_failed",
+    "actionable_range_downside_breached",
+    "near_open_direction_missed",
+    "gap_up_failed",
+    "bearish_secondary_scenario_worked",
+    "s1_support_precision_hit",
+    "fii_pressure_materialized"
+  ],
+  "key_level_score": 86.0,
+  "leading_scenario": "sideways",
+  "market_open": true,
+  "morning_overall_confidence": 62,
+  "notes": "Actual Nifty OHLC: open 23654.50, high 23733.70, low 23357.95, close 23382.60. Expected range contained the full actual range, but the actionable desk range failed on the downside and the close-vs-open direction missed. Bearish secondary scenario worked after breaks of 23613, 23547.75, and 23484.75, with the low nearly matching S1 23354.07. Final FII/DII context showed FII selling and DII buying. Bounded calibration processed only: update rolling hit rates, add listed failure tags, apply daily confidence offsets of probability_model -2, global_macro -1, institutional_flow +1, key_levels +1. No core logic rewrite.",
+  "predicted_close_vs_open": "near_open",
+  "range_contained": true,
+  "scenario_hit": false,
+  "trader_plan_scores": {
+    "future_intraday_trader": 84.0,
+    "option_buyer": 82.0,
+    "option_directional_seller": 62.0,
+    "option_non_directional_seller": 60.0
+  }
+}

@@ -1,8 +1,8 @@
 {
-  "average_confidence": 67.33333333333333,
-  "average_outcome_score": 62.29999999999999,
-  "confidence_error": 5.033333333333331,
-  "direction_hit_rate": 33.333333333333336,
+  "average_confidence": 66.0,
+  "average_outcome_score": 59.62499999999999,
+  "confidence_error": 6.374999999999998,
+  "direction_hit_rate": 25.0,
   "factor_confidence_offsets": {
     "derivatives_logic": 0,
     "global_macro": 0,
@@ -13,17 +13,24 @@
   },
   "failure_tag_counts": {
     "actionable_range_break": 1,
+    "actionable_range_downside_breached": 1,
     "actionable_range_low_breach": 1,
+    "bearish_secondary_scenario_worked": 1,
     "constructive_bias_miss": 1,
     "direction_miss": 1,
     "expected_range_low_breach": 1,
     "expiry_narrow_cpr_underweighted": 1,
+    "fii_pressure_materialized": 1,
+    "gap_up_failed": 1,
     "hedge_language_not_user_fit": 1,
     "late_session_flow_shock": 1,
     "markov_proxy_incomplete": 2,
     "narrow_cpr_range_selling_overconfidence": 1,
+    "near_open_direction_missed": 1,
     "range_too_wide": 2,
     "report_visual_density": 1,
+    "s1_support_precision_hit": 1,
+    "sideways_leading_scenario_failed": 1,
     "sideways_scenario_overweighted": 1,
     "support_zone_failed": 1,
     "vix_expansion_underweighted": 1
@@ -40,11 +47,15 @@
     {
       "date": "2026-05-29",
       "note": "NSE was open on 2026-05-29. Actual Nifty OHLC used: open 23902.15, high 24002.80, low 23484.75, close 23547.75. India VIX post-close public prints were inconsistent around 16.19 to 16.35; tally uses 16.19 as the primary post-close print and records elevated-volatility outcome. Final FII/DII cash data was not reliably available at the 17:00 IST tally boundary and is marked pending. Bounded calibration only: apply a -3 confidence offset to range-selling classifications under very narrow CPR plus V"
+    },
+    {
+      "date": "2026-06-01",
+      "note": "Actual Nifty OHLC: open 23654.50, high 23733.70, low 23357.95, close 23382.60. Expected range contained the full actual range, but the actionable desk range failed on the downside and the close-vs-open direction missed. Bearish secondary scenario worked after breaks of 23613, 23547.75, and 23484.75, with the low nearly matching S1 23354.07. Final FII/DII context showed FII selling and DII buying. Bounded calibration processed only: update rolling hit rates, add listed failure tags, apply daily c"
     }
   ],
-  "range_containment_rate": 66.66666666666667,
-  "sample_count": 3,
-  "scenario_hit_rate": 66.66666666666667,
-  "updated_at": "2026-05-29T14:19:52.872477+00:00",
+  "range_containment_rate": 75.0,
+  "sample_count": 4,
+  "scenario_hit_rate": 50.0,
+  "updated_at": "2026-06-01T17:02:03.557441+00:00",
   "version": 1
 }
