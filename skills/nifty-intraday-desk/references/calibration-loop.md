@@ -56,7 +56,7 @@ Score each section from 0 to 100:
 
 - Header data integrity.
 - Market summary.
-- Key levels.
+- Trader key levels: whether the visible long/short triggers, target zones, chop zone, and invalidation were useful.
 - VIX risk envelope containment.
 - Primary expected day range.
 - Expected high/low zone precision.

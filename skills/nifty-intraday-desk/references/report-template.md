@@ -52,32 +52,21 @@ End with:
 Section Confidence: XX%
 ```
 
-## 2. Key Levels
+## 2. Trader Key Levels
 
-Use a table:
+Show only decision levels a trader can act on. Keep this section to six rows or fewer.
+Do not list raw CPR, Pivot, R1, R2, S1, S2, previous high, previous low, or previous
+close unless that level is directly selected as the trigger or target. Use those
+calculations in the backend, not as visible table clutter.
 
 ```text
-Level Type | Level | Interpretation | Confidence
-Strong Resistance | |
-Immediate Resistance | |
-Strong Support | |
-Immediate Support | |
-Pivot | |
-CPR Zone (TC to BC) | |
-Previous Day High | |
-Previous Day Low | |
-Previous Day Close | |
-Breakout Level | |
-Breakdown Level | |
-VIX Risk Envelope | |
-Primary Expected Day Range | |
-Expected High Zone | |
-Expected Low Zone | |
-Tail Expansion Zones | |
-R1 | |
-R2 | |
-S1 | |
-S2 | |
+Trader Question | Level | Action
+Where to go long? | Above XXXX | Buy/long only after acceptance; SL XXXX
+Where to go short? | Below XXXX | Sell/short only after acceptance; SL XXXX
+Where to book longs / avoid fresh longs? | XXXX - XXXX | Upside supply / expected high zone
+Where to book shorts / avoid fresh shorts? | XXXX - XXXX | Downside support / expected low zone
+Where to avoid trading? | XXXX - XXXX | Chop/no-trade zone
+What invalidates the base view? | XXXX | Switch to alternate scenario
 ```
 
 End with section confidence.

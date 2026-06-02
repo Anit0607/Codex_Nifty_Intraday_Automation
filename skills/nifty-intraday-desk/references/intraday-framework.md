@@ -52,6 +52,13 @@ Open vs CPR:
 - Open just below BC: cautious bearish.
 - Open well below BC by more than 50 points: strong bearish opening.
 
+Trader-facing level display:
+
+- Always calculate Pivot, CPR, R1, R2, S1, S2, previous high, previous low, previous close, expected high/low zones, tail zones, and option-writing zones in the backend.
+- Do not show the full calculation table in the trader-facing morning report.
+- Section 2 should expose only the decision levels that affect execution: long trigger, short trigger, upside supply/target, downside support/target, chop/no-trade zone, and base-view invalidation.
+- If a calculated level such as R1, S1, CPR upper/lower, or previous day high/low is the chosen trigger or target, show the price level but do not label the row as a formula dump.
+
 Narrow CPR expiry guardrail:
 
 - If CPR width is below 30, the day is expiry-sensitive, and the open is inside CPR, keep close-vs-open confidence low until price accepts outside CPR or breaks a defined trigger.

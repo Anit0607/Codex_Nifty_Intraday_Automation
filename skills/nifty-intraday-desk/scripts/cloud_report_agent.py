@@ -208,6 +208,12 @@ Critical direction requirement:
 - Do not use near open, flat, neutral, conditional range, or similar wording in that field.
 - If evidence is mixed, still choose above or below and lower Direction Confidence.
 
+Critical Section 2 requirement:
+- Calculate CPR, Pivot, R1/R2, S1/S2, previous high/low/close, option zones, and range zones internally.
+- Do not show a full key-level calculation table in the morning report.
+- Section 2 must be "Trader Key Levels" with no more than six rows: long trigger, short trigger, upside supply/target, downside support/target, chop/no-trade zone, and base-view invalidation.
+- Do not display raw rows named Pivot, CPR Zone, R1, R2, S1, S2, Previous Day High, Previous Day Low, or Previous Day Close unless the level is embedded as the chosen trigger/target.
+
 Important output requirement:
 Return only Markdown for the file. Do not wrap the report in code fences.
 After the header's Overall Report Confidence line, go directly to ## 1. Market Summary.
