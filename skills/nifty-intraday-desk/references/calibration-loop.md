@@ -46,6 +46,10 @@ Create `learning/scorecards/YYYY-MM-DD.json`:
     "future_intraday_trader": 0.0
   },
   "failure_tags": [],
+  "bounded_auto_healing": {
+    "processed_in_scorecard": true,
+    "updates": []
+  },
   "notes": ""
 }
 ```
@@ -74,6 +78,7 @@ Allowed automatic changes:
 
 - Update rolling hit rates.
 - Update average confidence error.
+- Track VIX risk-envelope containment separately from primary expected-range tolerance and high/low zone precision.
 - Treat close-vs-open direction as binary only. `predicted_close_vs_open` and `actual_close_vs_open` must be `above_open` or `below_open`; legacy `near_open` forecasts should be tagged `non_binary_direction_forecast` and must not be counted as a clean direction hit.
 - Update high/low range precision hit rate.
 - Add range miss tags when actual high/low misses the expected high/low zone by more than 50 points.
@@ -83,6 +88,8 @@ Allowed automatic changes:
 - Add source reliability notes.
 - Adjust confidence offsets by no more than 3 percentage points per day.
 - Keep any individual factor confidence offset between -10 and +10 points.
+- If the scorecard contains `bounded_auto_healing.updates`, the calibration script should apply allowed `confidence_offset` updates and `pattern_flag` counts directly, subject to the same bounds.
+- For gap-down sessions where the low forms near the open, VIX cools, and the bearish breakdown trigger never fires, add the pattern tag `gap_down_low_at_open_vix_cool_reversal`.
 
 Disallowed automatic changes:
 

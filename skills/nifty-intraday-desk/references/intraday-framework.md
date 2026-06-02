@@ -114,6 +114,14 @@ Range construction guardrails:
 - On failed gap-up risk days, expected low must include S1/prior low and a tail zone toward S2 if support breaks.
 - If VIX is elevated and the prior day was a large selloff, widen the low-side tail before widening the upside target unless global and institutional evidence are strongly risk-on.
 
+Gap-down reversal guardrail:
+
+- Do not treat a gap-down open below prior low/S1 as enough evidence for a `Close below open` call by itself.
+- If the bearish thesis depends on a lower breakdown trigger that has not fired, keep bearish close-direction confidence at or below 52 unless VIX is rising and the opening support shelf is failing.
+- If the expected low zone is close to the opening price, the short trigger is below the open, and the long-trigger targets offer more distance than the short-trigger targets, explicitly consider a gap-down exhaustion / short-covering recovery.
+- In that setup, `Close above open` is allowed even when the broader classification remains sell-on-rise, but confidence must stay modest unless VIX is already cooling.
+- Tag misses from this setup as `gap_down_low_at_open_vix_cool_reversal` and `vix_cooling_underweighted` when the day low forms near the open and VIX closes materially lower.
+
 ## Derivatives Logic
 
 If live option-chain data is unavailable, simulate and label it:

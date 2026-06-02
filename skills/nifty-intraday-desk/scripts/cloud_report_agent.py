@@ -207,6 +207,7 @@ Critical direction requirement:
 - Close vs Open Direction must be binary only: Close above open or Close below open.
 - Do not use near open, flat, neutral, conditional range, or similar wording in that field.
 - If evidence is mixed, still choose above or below and lower Direction Confidence.
+- Do not choose Close below open only because the market opened gap-down. If the bearish case needs a lower breakdown trigger, expected low is near the open, and VIX-cooling recovery risk is meaningful, consider Close above open with modest confidence.
 
 Critical Section 2 requirement:
 - Calculate CPR, Pivot, R1/R2, S1/S2, previous high/low/close, option zones, and range zones internally.

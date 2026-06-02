@@ -16,6 +16,8 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
     "sample_count": 0,
     "direction_hit_rate": None,
     "range_containment_rate": None,
+    "vix_risk_envelope_containment_rate": None,
+    "primary_expected_range_tolerance_hit_rate": None,
     "range_precision_hit_rate": None,
     "average_high_zone_error": None,
     "average_low_zone_error": None,
@@ -36,6 +38,7 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
         "markov_overlay": 0,
     },
     "failure_tag_counts": {},
+    "pattern_counts": {},
     "notes": [],
     "metric_counts": {},
 }
@@ -174,7 +177,86 @@ def normalize_range_precision_fields(scorecard: dict[str, Any]) -> None:
     scorecard.setdefault("range_precision_basis", "legacy_expected_range_edges")
 
 
+def factor_key(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    clean = value.strip().lower()
+    mapping = {
+        "price action & gap context": "price_action_gap",
+        "price action and gap context": "price_action_gap",
+        "price_action_gap": "price_action_gap",
+        "india vix / volatility": "vix_volatility",
+        "india vix volatility": "vix_volatility",
+        "vix_volatility": "vix_volatility",
+        "derivatives logic": "derivatives_logic",
+        "derivatives / option logic": "derivatives_logic",
+        "derivatives_logic": "derivatives_logic",
+        "global & macro cues": "global_macro",
+        "global macro": "global_macro",
+        "global_macro": "global_macro",
+        "institutional flow / liquidity": "institutional_flow",
+        "institutional flow": "institutional_flow",
+        "institutional_flow": "institutional_flow",
+        "markov regime overlay": "markov_overlay",
+        "markov_overlay": "markov_overlay",
+    }
+    return mapping.get(clean)
+
+
+def bounded_updates(scorecard: dict[str, Any]) -> list[dict[str, Any]]:
+    healing = scorecard.get("bounded_auto_healing")
+    if not isinstance(healing, dict):
+        return []
+    updates = healing.get("updates")
+    if not isinstance(updates, list):
+        return []
+    return [update for update in updates if isinstance(update, dict)]
+
+
+def apply_bounded_auto_healing(calibration: dict[str, Any], scorecard: dict[str, Any]) -> bool:
+    applied_confidence_offset = False
+    offsets = calibration.setdefault("factor_confidence_offsets", {})
+    pattern_counts = calibration.setdefault("pattern_counts", {})
+
+    for update in bounded_updates(scorecard):
+        update_type = update.get("type")
+        if update_type == "confidence_offset":
+            key = factor_key(update.get("factor"))
+            delta = numeric(update.get("delta_points"))
+            if key is None or delta is None:
+                continue
+            if update.get("within_daily_limit") is False or update.get("within_factor_limit") is False:
+                continue
+            offsets[key] = round(clamp(float(offsets.get(key, 0)) + delta, -10, 10), 2)
+            applied_confidence_offset = True
+        elif update_type == "pattern_flag":
+            name = update.get("name")
+            if isinstance(name, str) and name.strip():
+                pattern_counts[name] = int(pattern_counts.get(name, 0)) + 1
+
+    return applied_confidence_offset
+
+
+def has_legacy_actionable_range(scorecard: dict[str, Any]) -> bool:
+    if scorecard.get("legacy_actionable_range_present") is False:
+        return False
+    low = numeric(scorecard.get("legacy_actionable_range_low"))
+    high = numeric(scorecard.get("legacy_actionable_range_high"))
+    if low is None or high is None:
+        return False
+    return not (low == 0 and high == 0)
+
+
+def remove_failure_tag(scorecard: dict[str, Any], tag: str) -> None:
+    tags = scorecard.get("failure_tags")
+    if isinstance(tags, list):
+        scorecard["failure_tags"] = [item for item in tags if item != tag]
+
+
 def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outcome_score: float | None) -> None:
+    if apply_bounded_auto_healing(calibration, scorecard):
+        return
+
     confidence = scorecard.get("morning_overall_confidence")
     if not isinstance(confidence, (int, float)) or outcome_score is None:
         return
@@ -191,8 +273,12 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
         "gap_misread": "price_action_gap",
         "gap_up_failed": "price_action_gap",
         "non_binary_direction_forecast": "price_action_gap",
+        "direction_miss": "price_action_gap",
+        "leading_bearish_scenario_miss": "price_action_gap",
+        "sell_on_rise_classification_miss": "price_action_gap",
         "vix_misread": "vix_volatility",
         "vix_expansion_underweighted": "vix_volatility",
+        "vix_cooling_underweighted": "vix_volatility",
         "range_precision_miss": "vix_volatility",
         "legacy_actionable_range_miss": "price_action_gap",
         "option_chain_misread": "derivatives_logic",
@@ -204,7 +290,7 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
     offsets = calibration.setdefault("factor_confidence_offsets", {})
     for tag, factor in mapping.items():
         if tag in tags:
-            offsets[factor] = int(clamp(int(offsets.get(factor, 0)) + step, -10, 10))
+            offsets[factor] = round(clamp(float(offsets.get(factor, 0)) + step, -10, 10), 2)
 
 
 def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[str, Any]:
@@ -213,6 +299,8 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     count = int(calibration.get("sample_count") or 0)
     direction_score = normalize_binary_direction(scorecard)
     range_score = bool_score(scorecard.get("range_contained"))
+    vix_envelope_score = bool_score(scorecard.get("vix_risk_envelope_contained"))
+    primary_range_tolerance_score = bool_score(scorecard.get("expected_range_edge_tolerance_hit"))
     high_error = zone_error(
         scorecard.get("actual_high"),
         scorecard.get("expected_high_zone_low"),
@@ -242,32 +330,45 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
         if low_error is not None and low_error > 50 and "expected_low_miss" not in tags:
             tags.append("expected_low_miss")
 
-    legacy_actionable_high_error = zone_error(
-        scorecard.get("actual_high"),
-        scorecard.get("legacy_actionable_range_high"),
-        scorecard.get("legacy_actionable_range_high"),
-    )
-    legacy_actionable_low_error = zone_error(
-        scorecard.get("actual_low"),
-        scorecard.get("legacy_actionable_range_low"),
-        scorecard.get("legacy_actionable_range_low"),
-    )
-    legacy_actionable_hit = scorecard.get("legacy_actionable_range_hit")
-    if legacy_actionable_high_error is not None:
-        scorecard["legacy_actionable_high_error"] = legacy_actionable_high_error
-    if legacy_actionable_low_error is not None:
-        scorecard["legacy_actionable_low_error"] = legacy_actionable_low_error
-    if (
-        not isinstance(legacy_actionable_hit, bool)
-        and legacy_actionable_high_error is not None
-        and legacy_actionable_low_error is not None
-    ):
-        legacy_actionable_hit = legacy_actionable_high_error <= 50.0 and legacy_actionable_low_error <= 50.0
-        scorecard["legacy_actionable_range_hit"] = bool(legacy_actionable_hit)
-    if legacy_actionable_hit is False:
-        tags = scorecard.setdefault("failure_tags", [])
-        if "legacy_actionable_range_miss" not in tags:
-            tags.append("legacy_actionable_range_miss")
+    legacy_actionable_high_error = None
+    legacy_actionable_low_error = None
+    legacy_actionable_hit = None
+    if has_legacy_actionable_range(scorecard):
+        legacy_actionable_high_error = zone_error(
+            scorecard.get("actual_high"),
+            scorecard.get("legacy_actionable_range_high"),
+            scorecard.get("legacy_actionable_range_high"),
+        )
+        legacy_actionable_low_error = zone_error(
+            scorecard.get("actual_low"),
+            scorecard.get("legacy_actionable_range_low"),
+            scorecard.get("legacy_actionable_range_low"),
+        )
+        legacy_actionable_hit = scorecard.get("legacy_actionable_range_hit")
+        if legacy_actionable_high_error is not None:
+            scorecard["legacy_actionable_high_error"] = legacy_actionable_high_error
+        if legacy_actionable_low_error is not None:
+            scorecard["legacy_actionable_low_error"] = legacy_actionable_low_error
+        if (
+            not isinstance(legacy_actionable_hit, bool)
+            and legacy_actionable_high_error is not None
+            and legacy_actionable_low_error is not None
+        ):
+            legacy_actionable_hit = legacy_actionable_high_error <= 50.0 and legacy_actionable_low_error <= 50.0
+            scorecard["legacy_actionable_range_hit"] = bool(legacy_actionable_hit)
+        if legacy_actionable_hit is False:
+            tags = scorecard.setdefault("failure_tags", [])
+            if "legacy_actionable_range_miss" not in tags:
+                tags.append("legacy_actionable_range_miss")
+    else:
+        scorecard["legacy_actionable_range_present"] = False
+        for key in [
+            "legacy_actionable_high_error",
+            "legacy_actionable_low_error",
+            "legacy_actionable_range_hit",
+        ]:
+            scorecard.pop(key, None)
+        remove_failure_tag(scorecard, "legacy_actionable_range_miss")
 
     range_precision_score = bool_score(range_precision)
     legacy_actionable_score = bool_score(legacy_actionable_hit)
@@ -295,6 +396,8 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
 
     rolling_metric(calibration, "direction_hit_rate", direction_score)
     rolling_metric(calibration, "range_containment_rate", range_score)
+    rolling_metric(calibration, "vix_risk_envelope_containment_rate", vix_envelope_score)
+    rolling_metric(calibration, "primary_expected_range_tolerance_hit_rate", primary_range_tolerance_score)
     rolling_metric(calibration, "range_precision_hit_rate", range_precision_score)
     rolling_metric(calibration, "average_high_zone_error", high_error)
     rolling_metric(calibration, "average_low_zone_error", low_error)

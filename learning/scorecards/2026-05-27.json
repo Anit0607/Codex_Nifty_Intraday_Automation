@@ -24,6 +24,7 @@
   "high_zone_error": 260.7999999999993,
   "key_level_score": 86,
   "leading_scenario": "sideways",
+  "legacy_actionable_range_present": false,
   "low_zone_error": 342.25,
   "market_open": true,
   "morning_overall_confidence": 66,

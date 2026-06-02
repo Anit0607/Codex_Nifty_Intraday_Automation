@@ -89,17 +89,13 @@
     "leading_bearish_scenario_miss",
     "sell_on_rise_classification_miss",
     "vix_cooling_underweighted",
-    "primary_range_exact_high_breach_within_tolerance",
-    "legacy_actionable_range_miss"
+    "primary_range_exact_high_breach_within_tolerance"
   ],
   "high_zone_error": 26.950000000000728,
   "institutional_flow_status": "same_day_final_or_provisional_values_not_reliably_available_in_accessible_sources_at_tally_time",
   "key_level_score": 78.0,
   "leading_scenario": "bearish",
-  "legacy_actionable_high_error": 23556.95,
-  "legacy_actionable_low_error": 23229.15,
   "legacy_actionable_range_high": 0.0,
-  "legacy_actionable_range_hit": false,
   "legacy_actionable_range_low": 0.0,
   "legacy_actionable_range_miss": false,
   "legacy_actionable_range_present": false,
