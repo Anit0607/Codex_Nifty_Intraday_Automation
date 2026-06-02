@@ -1,0 +1,167 @@
+{
+  "actual_change_vs_previous_close": 100.95,
+  "actual_change_vs_previous_close_percent": 0.43,
+  "actual_close": 23483.55,
+  "actual_close_minus_open": 254.4,
+  "actual_close_vs_open": "above_open",
+  "actual_day_range": 327.8,
+  "actual_high": 23556.95,
+  "actual_low": 23229.15,
+  "actual_open": 23229.15,
+  "actual_vix_change_percent": -7.16,
+  "actual_vix_close": 15.355,
+  "actual_vix_high": 16.5425,
+  "actual_vix_low": 15.115,
+  "actual_vix_open": 16.5425,
+  "alternate_scenario_hit": true,
+  "alternate_scenario_name": "bullish_trigger_path",
+  "bounded_auto_healing": {
+    "core_skill_logic_rewritten": false,
+    "disallowed_changes_applied": [],
+    "processed_in_scorecard": true,
+    "updates": [
+      {
+        "action": "record_miss",
+        "delta_points": 0.0,
+        "name": "close_vs_open_direction_hit_rate",
+        "type": "rolling_stat"
+      },
+      {
+        "action": "record_hit",
+        "delta_points": 0.0,
+        "name": "high_low_range_precision_hit_rate",
+        "type": "rolling_stat"
+      },
+      {
+        "action": "record_hit",
+        "delta_points": 0.0,
+        "name": "vix_risk_envelope_containment_rate",
+        "type": "rolling_stat"
+      },
+      {
+        "action": "recommend_bounded_decrease",
+        "delta_points": -1.0,
+        "factor": "Price Action & Gap Context",
+        "reason": "Bearish continuation was over-weighted after a gap-down open even though the 23190 breakdown trigger never fired.",
+        "type": "confidence_offset",
+        "within_daily_limit": true,
+        "within_factor_limit": true
+      },
+      {
+        "action": "recommend_bounded_decrease",
+        "delta_points": -1.0,
+        "factor": "India VIX / Volatility",
+        "reason": "Actual India VIX cooled sharply, supporting the bullish alternate path and reducing bearish expansion risk.",
+        "type": "confidence_offset",
+        "within_daily_limit": true,
+        "within_factor_limit": true
+      },
+      {
+        "action": "recommend_bounded_decrease",
+        "delta_points": -0.5,
+        "factor": "Derivatives Logic",
+        "reason": "Call resistance acted more as an upper cap near 23550 than as an early-session directional barrier.",
+        "type": "confidence_offset",
+        "within_daily_limit": true,
+        "within_factor_limit": true
+      },
+      {
+        "action": "increment_count_by_1",
+        "name": "gap_down_low_at_open_vix_cool_reversal",
+        "promotion_eligible": false,
+        "promotion_rule": "requires_at_least_five_comparable_observations",
+        "type": "pattern_flag"
+      }
+    ]
+  },
+  "date": "2026-06-02",
+  "direction_hit": false,
+  "execution_trigger_score": 82.0,
+  "expected_high_zone_high": 23530.0,
+  "expected_high_zone_low": 23470.0,
+  "expected_low_zone_high": 23220.0,
+  "expected_low_zone_low": 23120.0,
+  "expected_range_edge_tolerance_hit": true,
+  "expected_range_high": 23530.0,
+  "expected_range_low": 23120.0,
+  "failure_tags": [
+    "direction_miss",
+    "leading_bearish_scenario_miss",
+    "sell_on_rise_classification_miss",
+    "vix_cooling_underweighted",
+    "primary_range_exact_high_breach_within_tolerance",
+    "legacy_actionable_range_miss"
+  ],
+  "high_zone_error": 26.950000000000728,
+  "institutional_flow_status": "same_day_final_or_provisional_values_not_reliably_available_in_accessible_sources_at_tally_time",
+  "key_level_score": 78.0,
+  "leading_scenario": "bearish",
+  "legacy_actionable_high_error": 23556.95,
+  "legacy_actionable_low_error": 23229.15,
+  "legacy_actionable_range_high": 0.0,
+  "legacy_actionable_range_hit": false,
+  "legacy_actionable_range_low": 0.0,
+  "legacy_actionable_range_miss": false,
+  "legacy_actionable_range_present": false,
+  "legacy_expected_day_range_scored_as_zones": false,
+  "low_zone_error": 9.150000000001455,
+  "market_open": true,
+  "market_open_verification": {
+    "basis": "NSE Clearing June 2026 F&O settlement schedule lists 02-Jun-2026 as a trade date with settlement on 03-Jun-2026; post-close traded Nifty 50 data was available.",
+    "verified": true
+  },
+  "morning_overall_confidence": 58,
+  "notes": "NSE was open. Direction call missed: predicted below_open, actual above_open. Primary expected range exact containment failed because actual high exceeded 23530 by 26.95 points, but high and low zone precision passed the +/-50 point rule. VIX risk envelope contained the day. Long trigger above 23405 and targets 23480/23530 worked; short trigger below 23190 did not fire. Same-day final FII/DII values were marked unavailable rather than inferred.",
+  "opening_execution_map": {
+    "execution_trigger_score": 82.0,
+    "long_stop": 23345.0,
+    "long_targets": [
+      23480.0,
+      23530.0
+    ],
+    "long_targets_hit": true,
+    "long_trigger": 23405.0,
+    "long_trigger_hit": true,
+    "no_trade_chop_zone_high": 23380.0,
+    "no_trade_chop_zone_low": 23245.0,
+    "short_stop": 23255.0,
+    "short_targets": [
+      23120.0,
+      23030.0
+    ],
+    "short_trigger": 23190.0,
+    "short_trigger_hit": false
+  },
+  "predicted_close_vs_open": "below_open",
+  "range_contained": false,
+  "range_precision_hit": true,
+  "same_day_dii_cash_net_cr": null,
+  "same_day_fii_cash_net_cr": null,
+  "scenario_hit": false,
+  "section_scores": {
+    "close_vs_open_direction": 0.0,
+    "confidence_calibration": 45.0,
+    "expected_high_low_zone_precision": 88.0,
+    "factor_scoring": 42.0,
+    "header_data_integrity": 95.0,
+    "key_levels": 78.0,
+    "market_summary": 45.0,
+    "opening_execution_map_trigger_quality": 82.0,
+    "primary_expected_day_range": 82.0,
+    "probability_model": 35.0,
+    "risk_invalidations": 75.0,
+    "scenario_mapping": 65.0,
+    "trader_specific_guidance": 70.0,
+    "vix_risk_envelope_containment": 100.0
+  },
+  "tally_boundary_ist": "post-market after 17:00",
+  "trader_plan_scores": {
+    "future_intraday_trader": 82.0,
+    "option_buyer": 85.0,
+    "option_directional_seller": 48.0,
+    "option_non_directional_seller": 65.0
+  },
+  "vix_risk_envelope_contained": true,
+  "vix_risk_envelope_high": 23592.0,
+  "vix_risk_envelope_low": 22866.0
+}
