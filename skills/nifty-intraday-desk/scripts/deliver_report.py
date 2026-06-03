@@ -232,7 +232,7 @@ def send_telegram(pdf_path: Path, summary_text: str, mode: str) -> None:
         with pdf_path.open("rb") as handle:
             telegram_request(
                 "sendDocument",
-                data={"chat_id": chat_id, "caption": pdf_path.stem[:1024]},
+                data={"chat_id": chat_id},
                 files={"document": handle},
             )
 
@@ -253,7 +253,7 @@ def main() -> int:
     parser.add_argument(
         "--telegram-mode",
         choices=["document-only", "document-and-summary", "messages-only"],
-        default="document-and-summary",
+        default="document-only",
     )
     parser.add_argument("--dry-run", action="store_true", help="Render only; do not send.")
     args = parser.parse_args()
@@ -296,4 +296,3 @@ if __name__ == "__main__":
     except Exception as exc:  # noqa: BLE001
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(1)
-

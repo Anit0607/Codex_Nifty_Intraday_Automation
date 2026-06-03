@@ -2,8 +2,8 @@
 
 This script is designed for GitHub Actions. It calls the OpenAI Responses API
 with web search enabled, writes the generated Markdown report, optionally writes
-an evening scorecard, runs bounded calibration, and sends the PDF/report summary
-to Telegram through deliver_report.py.
+an evening scorecard, runs bounded calibration, and sends the PDF to Telegram
+through deliver_report.py.
 """
 
 from __future__ import annotations
@@ -305,6 +305,8 @@ def deliver(markdown_path: Path, title: str, out_dir: Path) -> None:
             "--out-dir",
             str(out_dir),
             "--telegram",
+            "--telegram-mode",
+            "document-only",
         ]
     )
 

@@ -30,7 +30,8 @@ Use a Gmail app password, not the normal Gmail password.
 
 ## Delivery
 
-Telegram is the primary channel. Gmail is optional and should be used only if the Telegram PDF plus split-message summary is not enough.
+Telegram is the primary channel. Gmail is optional. Telegram delivery should send
+only the PDF document, with no separate text summary and no document caption.
 
 Convert Markdown to PDF and deliver:
 
@@ -40,13 +41,12 @@ python "$env:USERPROFILE\.codex\skills\nifty-intraday-desk\scripts\deliver_repor
   --title "Nifty 50 Intraday Desk Report - YYYY-MM-DD" `
   --out-dir "reports\YYYY-MM-DD" `
   --telegram `
+  --telegram-mode document-only `
   --env "config\.env"
 ```
 
-Telegram can receive both:
-
-- The PDF document.
-- A split plain-text summary, under Telegram message limits.
+Do not use `document-and-summary` or `messages-only` for the scheduled morning
+or evening reports unless the user explicitly asks to restore text messages.
 
 ## Holiday Handling
 
