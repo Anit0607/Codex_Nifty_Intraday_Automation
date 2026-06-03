@@ -1,13 +1,13 @@
 {
-  "average_confidence": 64.4,
-  "average_execution_trigger_score": 82.0,
-  "average_high_zone_error": 220.29000000000013,
+  "average_confidence": 63.333333333333336,
+  "average_execution_trigger_score": 85.0,
+  "average_high_zone_error": 184.46666666666655,
   "average_legacy_actionable_high_error": 76.23333333333358,
   "average_legacy_actionable_low_error": 167.28333333333285,
-  "average_low_zone_error": 151.21000000000058,
-  "average_outcome_score": 41.62,
-  "confidence_error": 22.78,
-  "direction_hit_rate": 0.0,
+  "average_low_zone_error": 132.4250000000005,
+  "average_outcome_score": 50.4,
+  "confidence_error": 12.933333333333335,
+  "direction_hit_rate": 16.666666666666668,
   "factor_confidence_offsets": {
     "derivatives_logic": -0.5,
     "global_macro": 0,
@@ -51,20 +51,20 @@
   },
   "legacy_actionable_range_hit_rate": 0.0,
   "metric_counts": {
-    "average_confidence": 5,
-    "average_execution_trigger_score": 1,
-    "average_high_zone_error": 5,
+    "average_confidence": 6,
+    "average_execution_trigger_score": 2,
+    "average_high_zone_error": 6,
     "average_legacy_actionable_high_error": 3,
     "average_legacy_actionable_low_error": 3,
-    "average_low_zone_error": 5,
-    "average_outcome_score": 5,
-    "confidence_error": 5,
-    "direction_hit_rate": 5,
+    "average_low_zone_error": 6,
+    "average_outcome_score": 6,
+    "confidence_error": 6,
+    "direction_hit_rate": 6,
     "legacy_actionable_range_hit_rate": 3,
     "primary_expected_range_tolerance_hit_rate": 1,
-    "range_containment_rate": 5,
-    "range_precision_hit_rate": 5,
-    "scenario_hit_rate": 5,
+    "range_containment_rate": 6,
+    "range_precision_hit_rate": 6,
+    "scenario_hit_rate": 6,
     "vix_risk_envelope_containment_rate": 1
   },
   "notes": [
@@ -87,17 +87,21 @@
     {
       "date": "2026-06-02",
       "note": "NSE was open. Direction call missed: predicted below_open, actual above_open. Primary expected range exact containment failed because actual high exceeded 23530 by 26.95 points, but high and low zone precision passed the +/-50 point rule. VIX risk envelope contained the day. Long trigger above 23405 and targets 23480/23530 worked; short trigger below 23190 did not fire. Same-day final FII/DII values were marked unavailable rather than inferred."
+    },
+    {
+      "date": "2026-06-03",
+      "note": "Strict primary expected range containment is false because actual low 23151.50 was below expected range low 23190.00. Range precision is still true because both high-zone and low-zone errors were within the +/-50 point tolerance. Direction was a binary hit, but the close was only 10.35 points below open, so direction-hit quality is marked thin_margin."
     }
   ],
   "pattern_counts": {
     "gap_down_low_at_open_vix_cool_reversal": 1
   },
   "primary_expected_range_tolerance_hit_rate": 100.0,
-  "range_containment_rate": 60.0,
-  "range_precision_hit_rate": 20.0,
-  "sample_count": 5,
-  "scenario_hit_rate": 40.0,
-  "updated_at": "2026-06-02T20:26:07.153561+00:00",
+  "range_containment_rate": 50.0,
+  "range_precision_hit_rate": 33.333333333333336,
+  "sample_count": 6,
+  "scenario_hit_rate": 50.0,
+  "updated_at": "2026-06-03T16:01:06.760958+00:00",
   "version": 1,
   "vix_risk_envelope_containment_rate": 100.0
 }

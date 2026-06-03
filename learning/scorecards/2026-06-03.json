@@ -1,0 +1,157 @@
+{
+  "actual_close": 23405.6,
+  "actual_close_minus_open": -10.35,
+  "actual_close_vs_open": "below_open",
+  "actual_day_range": 308.15,
+  "actual_high": 23459.65,
+  "actual_india_vix_close": 16.28,
+  "actual_india_vix_high": 16.98,
+  "actual_india_vix_low": 14.85,
+  "actual_india_vix_open": 15.36,
+  "actual_low": 23151.5,
+  "actual_open": 23415.95,
+  "bounded_auto_healing": {
+    "core_skill_logic_rewrite": false,
+    "processed_in_scorecard": true,
+    "updates": [
+      {
+        "applied": true,
+        "metric": "direction_hit_rate",
+        "type": "rolling_stat_update",
+        "value": true
+      },
+      {
+        "applied": true,
+        "metric": "vix_envelope_containment_rate",
+        "type": "rolling_stat_update",
+        "value": true
+      },
+      {
+        "applied": true,
+        "metric": "range_precision_hit_rate",
+        "type": "rolling_stat_update",
+        "value": true
+      },
+      {
+        "applied": true,
+        "metric": "short_trigger_effectiveness",
+        "type": "rolling_stat_update",
+        "value": true
+      },
+      {
+        "applied": true,
+        "bounds_check": {
+          "individual_factor_offset_max": 10,
+          "individual_factor_offset_min": -10,
+          "max_daily_delta": 3,
+          "within_bounds": true
+        },
+        "delta": 1,
+        "reason": "Short trigger, target levels, VIX envelope, and high/low zone precision were all tolerance-compliant.",
+        "target": "key_level_and_range_precision_confidence",
+        "type": "confidence_offset"
+      },
+      {
+        "applied": true,
+        "note": "Post-market OHLC, India VIX, and institutional cash-flow data were available and mutually consistent enough for scoring.",
+        "sources": [
+          "Dhan",
+          "Business Standard",
+          "Moneycontrol",
+          "Trendlyne"
+        ],
+        "type": "source_reliability_note"
+      },
+      {
+        "applied": true,
+        "reason": "No repeated failure pattern requiring proposal; do not rewrite CPR, VIX envelope, probability model, or trader-plan logic from one successful day.",
+        "target": "core_skill_logic",
+        "type": "no_op_guardrail"
+      }
+    ]
+  },
+  "confidence_calibration": {
+    "actual_tally_score": 84.0,
+    "calibration_read": "underconfident_but_correct",
+    "confidence_error_points": -26.0,
+    "morning_confidence": 58
+  },
+  "date": "2026-06-03",
+  "direction_hit": true,
+  "direction_hit_quality": "thin_margin",
+  "execution_trigger_score": 88.0,
+  "expected_high_zone_high": 23540.0,
+  "expected_high_zone_low": 23465.0,
+  "expected_low_zone_high": 23285.0,
+  "expected_low_zone_low": 23190.0,
+  "expected_range_high": 23540.0,
+  "expected_range_low": 23190.0,
+  "expected_range_tolerance_hit": true,
+  "expected_range_tolerance_points": 50.0,
+  "failure_tags": [],
+  "high_zone_error": 5.349999999998545,
+  "institutional_context": {
+    "dii_cash_net_crore": 5740.89,
+    "fii_cash_net_crore": -5616.56,
+    "final_status": "available"
+  },
+  "key_level_score": 88.0,
+  "leading_scenario": "bearish",
+  "legacy_actionable_range_high": null,
+  "legacy_actionable_range_low": null,
+  "legacy_actionable_range_miss": false,
+  "legacy_actionable_range_present": false,
+  "low_zone_error": 38.5,
+  "macro_context": {
+    "brent_crude_usd_per_bbl": 98.35,
+    "hsbc_india_services_pmi_may_2026": 59.8,
+    "india_10y_yield": 7.025,
+    "usd_inr_reference": 95.6775
+  },
+  "market_open": true,
+  "market_open_verification": {
+    "verification_basis": "Post-market Nifty 50 OHLC and closing prints available for 2026-06-03.",
+    "verified_after_1700_ist": true
+  },
+  "morning_overall_confidence": 58,
+  "notes": "Strict primary expected range containment is false because actual low 23151.50 was below expected range low 23190.00. Range precision is still true because both high-zone and low-zone errors were within the +/-50 point tolerance. Direction was a binary hit, but the close was only 10.35 points below open, so direction-hit quality is marked thin_margin.",
+  "overall_tally_score": 84.0,
+  "predicted_close_vs_open": "below_open",
+  "range_contained": false,
+  "range_precision_hit": true,
+  "scenario_hit": true,
+  "section_scores": {
+    "assumptions_made": 78,
+    "close_vs_open_direction": 78,
+    "expected_high_low_zone_precision": 90,
+    "factor_scoring": 80,
+    "header_data_integrity": 96,
+    "market_summary": 82,
+    "opening_execution_map_trigger_quality": 88,
+    "primary_expected_day_range": 85,
+    "probability_model": 76,
+    "risk_invalidations": 82,
+    "scenario_mapping": 86,
+    "trader_key_levels": 88,
+    "trader_specific_guidance": 82,
+    "trading_desk_interpretation": 84,
+    "vix_risk_envelope_containment": 100
+  },
+  "success_tags": [
+    "direction_hit",
+    "short_trigger_hit",
+    "short_targets_hit",
+    "downside_tail_zone_hit",
+    "vix_envelope_contained",
+    "range_precision_hit"
+  ],
+  "trader_plan_scores": {
+    "future_intraday_trader": 90.0,
+    "option_buyer": 90.0,
+    "option_directional_seller": 82.0,
+    "option_non_directional_seller": 72.0
+  },
+  "vix_envelope_contained": true,
+  "vix_risk_envelope_high": 23756.0,
+  "vix_risk_envelope_low": 23076.0
+}
