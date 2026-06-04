@@ -227,8 +227,28 @@ Critical direction requirement:
 Critical Section 2 requirement:
 - Calculate CPR, Pivot, R1/R2, S1/S2, previous high/low/close, option zones, and range zones internally.
 - Do not show a full key-level calculation table in the morning report.
-- Section 2 must be "Trader Key Levels" with no more than six rows: long trigger, short trigger, upside supply/target, downside support/target, chop/no-trade zone, and base-view invalidation.
+- Section 2 must be "Trader Key Levels" with no more than six rows.
+- The long and short rows must show Entry/Zone, SL, T1, T2, RR to T1/T2, and Action in the same row.
 - Do not display raw rows named Pivot, CPR Zone, R1, R2, S1, S2, Previous Day High, Previous Day Low, or Previous Day Close unless the level is embedded as the chosen trigger/target.
+
+Critical execution consistency requirement:
+- Treat the header's Opening Execution Map as the master trade plan.
+- Section 2, Scenario Mapping, Invalidations, Trader-Specific Desk Plan, and Trading Desk Interpretation must reuse the exact same long trigger, long SL, long T1/T2, short trigger, short SL, and short T1/T2.
+- Do not create different exit targets in trader-specific sections. If mentioning a level beyond T2, label it as an extension beyond T2, not the primary exit target.
+- Calculate and display RR to T1 and T2 for long and short triggers. If T1 RR is below 1.25, mark that setup weak/scalp-only or avoid it. If T1 RR is below 1.5, say partial booking must be fast.
+
+Critical readability requirement:
+- Factor Scoring Table must be compact and action-oriented: Factor, Bias, Weight, Trader read, Confidence.
+- Do not put source links or long paragraphs inside factor or invalidation tables. Put links only in the Sources section.
+- Invalidations must use "If this happens / Trader action / View invalidated / Confidence" language.
+- Every invalidation row must tell the trader what to do: exit longs, exit shorts, avoid calls/puts, avoid option selling, reduce risk, or wait.
+
+Critical trader-specific requirement:
+- For Option Non-Directional Seller, state structure, entry, legs/strike rule, leg-wise SL, overall SL, target/exit, and time stop.
+- For Option Directional Seller, state side, strike rule, entry trigger, spot SL, target/exit, and time stop.
+- For Option Buyer, state call/put, strike rule, entry trigger, spot SL, premium SL only if premium is available/estimated, target/exit, and time stop.
+- For Future Intraday Trader, use the exact master long/short trigger, SL, T1, T2, and RR.
+- If an actionable entry/exit cannot be stated clearly for a trader type, mark that trader type "Avoid" rather than filling the section with vague guidance.
 
 Important output requirement:
 Return only Markdown for the file. Do not wrap the report in code fences.
@@ -278,6 +298,7 @@ Scorecard requirements:
 - Include expected_range_high_error, expected_range_low_error, and expected_day_range_precision_hit. Score Expected Day Range edge precision separately from containment.
 - Include expected_high_zone_width and expected_low_zone_width. Add expected_high_zone_too_wide / expected_low_zone_too_wide when zone width is above 60 points.
 - Include long_target1_rr, long_target2_rr, short_target1_rr, short_target2_rr when trigger, SL, and targets are available. Add target1_rr_below_preferred if fired target-1 RR is below 1.5.
+- Check whether trader-specific exit targets match the master Opening Execution Map. If later sections use conflicting primary targets/stops, add execution_target_inconsistency and lower the trader guidance score.
 - If the morning report has only a legacy Expected Day Range and no high/low zones, treat the high edge and low edge as legacy high/low zone forecasts and score them against the +/-50 point tolerance.
 - If the morning report contains a legacy Actionable Desk Range, score it separately as legacy_actionable_range_hit using the same +/-50 edge tolerance, add legacy_actionable_range_miss when it fails, and do not let it override the primary Expected Day Range score.
 - Set range_precision_hit=false if actual high or low misses the expected zone by more than 50 points.

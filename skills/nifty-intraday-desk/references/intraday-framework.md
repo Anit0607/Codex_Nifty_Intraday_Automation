@@ -59,6 +59,13 @@ Trader-facing level display:
 - Section 2 should expose only the decision levels that affect execution: long trigger, short trigger, upside supply/target, downside support/target, chop/no-trade zone, and base-view invalidation.
 - If a calculated level such as R1, S1, CPR upper/lower, or previous day high/low is the chosen trigger or target, show the price level but do not label the row as a formula dump.
 
+Master execution consistency:
+
+- The Opening Execution Map is the source of truth for all trader-facing execution.
+- Section 2, Scenario Mapping, Invalidations, Trader-Specific Desk Plan, and Trading Desk Interpretation must reuse the same long trigger, long SL, long T1/T2, short trigger, short SL, and short T1/T2.
+- Do not introduce different exit targets later in the report. If a level beyond T2 is discussed, label it as "extension beyond T2" and do not call it the primary exit target.
+- Show target-1 and target-2 risk/reward for futures-style triggers. If T1 RR is below 1.25, mark the setup weak/scalp-only or skip the trade. If T1 RR is below 1.5 but above 1.25, state that the setup is acceptable only with fast partial booking.
+
 Narrow CPR expiry guardrail:
 
 - If CPR width is below 30, the day is expiry-sensitive, and the open is inside CPR, keep close-vs-open confidence low until price accepts outside CPR or breaks a defined trigger.
@@ -116,6 +123,7 @@ Execution risk-reward rule:
 - Target 1 RR should preferably be at least 1.5. If it is below 1.25, mark the setup as weak/scalp-only or adjust the trigger/target.
 - Target 2 RR should preferably be at least 2.0.
 - The evening tally must report whether each trigger fired, which targets were reached, and the actual target-1/target-2 RR.
+- If the morning report gives trader-specific targets that conflict with the master trigger targets, tag the report as `execution_target_inconsistency`.
 
 Range construction guardrails:
 
@@ -201,6 +209,27 @@ Use Markov regime overlay as a calibration layer:
 - Bear persistence supports downside.
 - Sideways persistence supports range.
 - Mixed transition matrix lowers confidence.
+
+Factor-scoring readability:
+
+- The factor table is for trader interpretation, not data archiving.
+- Keep each table cell short and action-oriented.
+- Do not place source URLs inside factor or invalidation tables. Put source links in the Sources section instead.
+- Every factor row should answer: does this support long, short, range, or caution?
+
+Invalidation readability:
+
+- Invalidation rows must use "If this happens -> trader action" language.
+- Avoid abstract phrases such as "primary view invalidated" without telling the trader what to exit, avoid, or switch to.
+- Every invalidation must connect to the master execution map: exit long, exit short, avoid option selling, reduce size, wait, or switch scenario.
+
+Trader-specific execution rules:
+
+- Option non-directional seller guidance must state: suitable/avoid, structure, entry condition, exact strikes or strike-selection rule, leg-wise SL, overall SL, target/exit, and time stop.
+- Directional option seller guidance must state side, strike rule, spot entry trigger, spot SL, target/exit, and time stop.
+- Option buyer guidance must state call/put, strike rule, spot entry trigger, spot SL, premium SL only when a premium is available or explicitly estimated, target/exit, and time stop.
+- Futures guidance must state long and short plans using the exact master trigger, SL, T1, T2, and RR.
+- If exact option premium is unavailable, do not fabricate premium SL/target. Use spot-level SL and label premium logic as unavailable/simulated.
 
 Downside weighting guardrail:
 

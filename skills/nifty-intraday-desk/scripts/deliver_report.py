@@ -74,7 +74,7 @@ def render_pdf(markdown_path: Path, pdf_path: Path, title: str) -> None:
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import inch
-        from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
+        from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
     except ImportError as exc:
         raise RuntimeError(
             "reportlab is required for PDF rendering. Install with: "
@@ -128,6 +128,26 @@ def render_pdf(markdown_path: Path, pdf_path: Path, title: str) -> None:
             borderPadding=4,
         )
     )
+    styles.add(
+        ParagraphStyle(
+            name="DeskTableHeader",
+            parent=styles["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=7,
+            leading=8.5,
+            textColor=colors.HexColor("#111827"),
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="DeskTableCell",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=6.8,
+            leading=8.2,
+            textColor=colors.HexColor("#111827"),
+        )
+    )
 
     doc = SimpleDocTemplate(
         str(pdf_path),
@@ -143,6 +163,81 @@ def render_pdf(markdown_path: Path, pdf_path: Path, title: str) -> None:
     in_code = False
     code_buffer: list[str] = []
 
+    def clean_inline(text: str) -> str:
+        clean = re.sub(r"!\[[^\]]*\]\([^)]+\)", "", text)
+        clean = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", clean)
+        clean = html.escape(clean.strip())
+        clean = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", clean)
+        clean = re.sub(r"`([^`]+)`", r'<font name="Courier">\1</font>', clean)
+        return clean
+
+    def split_table_row(line: str) -> list[str]:
+        stripped = line.strip()
+        if "|" not in stripped:
+            return []
+        if stripped.startswith("|"):
+            stripped = stripped[1:]
+        if stripped.endswith("|"):
+            stripped = stripped[:-1]
+        return [cell.strip() for cell in stripped.split("|")]
+
+    def is_separator_row(line: str) -> bool:
+        cells = split_table_row(line)
+        return len(cells) >= 2 and all(re.fullmatch(r":?-{2,}:?", cell.strip()) for cell in cells)
+
+    def is_table_start(index: int) -> bool:
+        return index + 1 < len(lines) and "|" in lines[index] and is_separator_row(lines[index + 1])
+
+    def column_widths(headers: list[str]) -> list[float]:
+        count = max(1, len(headers))
+        lowered = [header.lower() for header in headers]
+        if count == 2:
+            weights = [0.28, 0.72]
+        elif count == 3:
+            weights = [0.25, 0.25, 0.50]
+        elif count == 4:
+            weights = [0.25, 0.28, 0.28, 0.19]
+        elif count == 5:
+            weights = [0.22, 0.16, 0.13, 0.34, 0.15]
+        elif count == 6 and any("factor" in header for header in lowered):
+            weights = [0.18, 0.13, 0.10, 0.34, 0.15, 0.10]
+        elif count == 7 and any("rr" in header for header in lowered):
+            weights = [0.13, 0.16, 0.11, 0.11, 0.11, 0.15, 0.23]
+        else:
+            weights = [1 / count] * count
+        total = sum(weights)
+        return [doc.width * weight / total for weight in weights]
+
+    def add_table(table_lines: list[str]) -> None:
+        rows = [split_table_row(row) for row in table_lines if not is_separator_row(row)]
+        rows = [row for row in rows if row]
+        if not rows:
+            return
+        max_cols = max(len(row) for row in rows)
+        normalized = [row + [""] * (max_cols - len(row)) for row in rows]
+        data = []
+        for row_index, row in enumerate(normalized):
+            style = styles["DeskTableHeader"] if row_index == 0 else styles["DeskTableCell"]
+            data.append([Paragraph(clean_inline(cell), style) for cell in row])
+        table = Table(data, colWidths=column_widths(normalized[0]), repeatRows=1, hAlign="LEFT")
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E0F2F1")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#111827")),
+                    ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#CBD5E1")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
+                ]
+            )
+        )
+        story.append(table)
+        story.append(Spacer(1, 6))
+
     def flush_code() -> None:
         nonlocal code_buffer
         if code_buffer:
@@ -151,7 +246,9 @@ def render_pdf(markdown_path: Path, pdf_path: Path, title: str) -> None:
             story.append(Spacer(1, 5))
             code_buffer = []
 
-    for line in lines:
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
         stripped = line.strip()
         if stripped.startswith("```"):
             if in_code:
@@ -159,23 +256,35 @@ def render_pdf(markdown_path: Path, pdf_path: Path, title: str) -> None:
                 in_code = False
             else:
                 in_code = True
+            idx += 1
             continue
         if in_code:
             code_buffer.append(line)
+            idx += 1
+            continue
+        if is_table_start(idx):
+            table_lines = [lines[idx], lines[idx + 1]]
+            idx += 2
+            while idx < len(lines) and "|" in lines[idx].strip() and lines[idx].strip():
+                table_lines.append(lines[idx])
+                idx += 1
+            add_table(table_lines)
             continue
         if not stripped:
             story.append(Spacer(1, 4))
+            idx += 1
             continue
         if stripped == "---":
             story.append(PageBreak())
+            idx += 1
             continue
         if stripped.startswith("#"):
             clean = re.sub(r"^#{1,6}\s*", "", stripped)
             story.append(Paragraph(html.escape(clean), styles["DeskHeading"]))
+            idx += 1
             continue
-        clean = html.escape(stripped)
-        clean = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", clean)
-        story.append(Paragraph(clean, styles["DeskBody"]))
+        story.append(Paragraph(clean_inline(stripped), styles["DeskBody"]))
+        idx += 1
 
     flush_code()
     doc.build(story)

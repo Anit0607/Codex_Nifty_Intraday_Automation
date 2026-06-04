@@ -26,6 +26,7 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
     "average_low_zone_error": None,
     "average_expected_high_zone_width": None,
     "average_expected_low_zone_width": None,
+    "execution_target_consistency_rate": None,
     "target1_rr_quality_rate": None,
     "average_long_target1_rr": None,
     "average_long_target2_rr": None,
@@ -310,6 +311,7 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
         "expected_high_zone_too_wide": "vix_volatility",
         "expected_low_zone_too_wide": "vix_volatility",
         "target1_rr_below_preferred": "derivatives_logic",
+        "execution_target_inconsistency": "derivatives_logic",
         "legacy_actionable_range_miss": "price_action_gap",
         "option_chain_misread": "derivatives_logic",
         "global_cue_misread": "global_macro",
@@ -471,6 +473,9 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     trader_scores = scorecard.get("trader_plan_scores") or {}
     opening_map = scorecard.get("opening_execution_map") or {}
     tags = scorecard.setdefault("failure_tags", [])
+    execution_target_consistency_score = bool_score(scorecard.get("execution_targets_consistent"))
+    if scorecard.get("execution_targets_consistent") is False and "execution_target_inconsistency" not in tags:
+        tags.append("execution_target_inconsistency")
 
     long_target1_rr = numeric(scorecard.get("long_target1_rr"))
     long_target2_rr = numeric(scorecard.get("long_target2_rr"))
@@ -541,6 +546,7 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
                 scenario_score,
                 float(key_level_score) if isinstance(key_level_score, (int, float)) else None,
                 float(execution_trigger_score) if isinstance(execution_trigger_score, (int, float)) else None,
+                execution_target_consistency_score,
                 mean([float(v) for v in trader_scores.values() if isinstance(v, (int, float))]),
                 target1_rr_quality,
                 zone_width_quality_score,
@@ -569,6 +575,7 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     rolling_metric(calibration, "average_low_zone_error", low_error)
     rolling_metric(calibration, "average_expected_high_zone_width", expected_high_zone_width)
     rolling_metric(calibration, "average_expected_low_zone_width", expected_low_zone_width)
+    rolling_metric(calibration, "execution_target_consistency_rate", execution_target_consistency_score)
     rolling_metric(calibration, "target1_rr_quality_rate", target1_rr_quality)
     rolling_metric(calibration, "average_long_target1_rr", long_target1_rr)
     rolling_metric(calibration, "average_long_target2_rr", long_target2_rr)
