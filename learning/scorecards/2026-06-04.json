@@ -37,6 +37,24 @@
       },
       {
         "applied": true,
+        "metric": "expected_day_range_edge_precision",
+        "type": "rolling_metric_observation",
+        "value": "miss_low_edge_by_92.30_points"
+      },
+      {
+        "applied": true,
+        "metric": "high_low_zone_width_discipline",
+        "type": "failure_observation",
+        "value": "high_zone_85_points_low_zone_70_points"
+      },
+      {
+        "applied": true,
+        "metric": "opening_execution_rr_quality",
+        "type": "failure_observation",
+        "value": "long_target1_rr_1.23_below_preferred_1.50"
+      },
+      {
+        "applied": true,
         "increment": 1,
         "name": "gap_down_low_at_open_vix_cool_reversal",
         "type": "pattern_flag"
@@ -56,16 +74,29 @@
       }
     ]
   },
+  "calibration_outcome_score": 62.33,
   "date": "2026-06-04",
   "direction_hit": true,
   "execution_trigger_score": 82.0,
+  "expected_day_range_precision_hit": false,
   "expected_high_zone_high": 23505.0,
   "expected_high_zone_low": 23420.0,
+  "expected_high_zone_width": 85.0,
   "expected_low_zone_high": 23225.0,
   "expected_low_zone_low": 23155.0,
+  "expected_low_zone_width": 70.0,
   "expected_range_high": 23505.0,
+  "expected_range_high_error": 39.70000000000073,
   "expected_range_low": 23155.0,
-  "failure_tags": [],
+  "expected_range_low_error": 92.29999999999927,
+  "expected_zone_width_quality_score": 20.0,
+  "failure_tags": [
+    "expected_day_range_precision_miss",
+    "expected_range_low_edge_miss",
+    "expected_high_zone_too_wide",
+    "expected_low_zone_too_wide",
+    "target1_rr_below_preferred"
+  ],
   "high_zone_error": 0.0,
   "institutional_flow_status": "04-Jun-2026 final/provisional FII-DII cash flow not source-confirmed in fetched post-market results",
   "key_level_score": 84.0,
@@ -74,10 +105,32 @@
   "legacy_actionable_range_low": 0.0,
   "legacy_actionable_range_miss": false,
   "legacy_actionable_range_present": false,
+  "long_target1_rr": 1.23,
+  "long_target2_rr": 2.63,
   "low_zone_error": 22.299999999999272,
   "market_open": true,
   "morning_overall_confidence": 58,
-  "notes": "Morning report performed well. The gap-down recovery call, primary expected range, high zone, close-vs-open direction, and VIX-cooling thesis were all validated. Low zone was not touched exactly but remained within the +/-50 point tolerance. No expected_high_miss, expected_low_miss, or range_precision_miss tags apply.",
+  "notes": "Mixed result, not a clean high-score day. Close-vs-open direction, high-zone placement, VIX cooling, and long target 1 worked. Expected Day Range edge precision failed on the low side by 92.30 points, both visible high/low zones were too wide for trader use, and the fired long target-1 RR was only 1.23 versus the preferred 1.50+ threshold.",
+  "opening_execution_map": {
+    "long_stop": 23318.0,
+    "long_target1_hit": true,
+    "long_target2_hit": false,
+    "long_targets": [
+      23445.0,
+      23525.0
+    ],
+    "long_trigger": 23375.0,
+    "long_trigger_hit": true,
+    "short_stop": 23285.0,
+    "short_target1_hit": false,
+    "short_target2_hit": false,
+    "short_targets": [
+      23155.0,
+      23075.0
+    ],
+    "short_trigger": 23215.0,
+    "short_trigger_hit": false
+  },
   "pattern_tags": [
     "gap_down_low_at_open_vix_cool_reversal",
     "vix_cooling_supported_recovery",
@@ -89,22 +142,25 @@
   "range_precision_hit": true,
   "scenario_hit": true,
   "section_scores": {
+    "calibration_outcome_score": 62.33,
     "close_vs_open_direction": 100.0,
-    "confidence_calibration": 88.0,
-    "expected_high_low_zone_precision": 95.0,
+    "confidence_calibration": 62.0,
+    "expected_high_low_zone_precision": 68.0,
     "factor_scoring": 78.0,
     "header_data_integrity": 92.0,
     "market_summary": 84.0,
-    "opening_execution_map": 82.0,
-    "overall_tally_score": 86.0,
-    "primary_expected_day_range": 100.0,
-    "probability_model": 86.0,
+    "opening_execution_map": 62.0,
+    "overall_tally_score": 64.0,
+    "primary_expected_day_range": 52.0,
+    "probability_model": 70.0,
     "risk_invalidations": 88.0,
     "scenario_mapping": 86.0,
     "trader_key_levels": 84.0,
-    "trader_specific_guidance": 75.0,
-    "vix_risk_envelope_containment": 100.0
+    "trader_specific_guidance": 64.0,
+    "vix_risk_envelope_containment": 60.0
   },
+  "short_target1_rr": 0.86,
+  "short_target2_rr": 2.0,
   "time_boundary": "post-market after 17:00 IST",
   "trader_plan_scores": {
     "future_intraday_trader": 80.0,

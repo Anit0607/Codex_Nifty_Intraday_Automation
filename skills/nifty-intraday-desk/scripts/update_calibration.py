@@ -18,9 +18,19 @@ DEFAULT_CALIBRATION: dict[str, Any] = {
     "range_containment_rate": None,
     "vix_risk_envelope_containment_rate": None,
     "primary_expected_range_tolerance_hit_rate": None,
+    "expected_day_range_precision_hit_rate": None,
+    "average_expected_range_high_error": None,
+    "average_expected_range_low_error": None,
     "range_precision_hit_rate": None,
     "average_high_zone_error": None,
     "average_low_zone_error": None,
+    "average_expected_high_zone_width": None,
+    "average_expected_low_zone_width": None,
+    "target1_rr_quality_rate": None,
+    "average_long_target1_rr": None,
+    "average_long_target2_rr": None,
+    "average_short_target1_rr": None,
+    "average_short_target2_rr": None,
     "legacy_actionable_range_hit_rate": None,
     "average_legacy_actionable_high_error": None,
     "average_legacy_actionable_low_error": None,
@@ -71,6 +81,19 @@ def zone_error(actual: Any, low: Any, high: Any) -> float | None:
     if low_f <= actual_f <= high_f:
         return 0.0
     return min(abs(actual_f - low_f), abs(actual_f - high_f))
+
+
+def zone_width_score(width: Any) -> float | None:
+    width_f = numeric(width)
+    if width_f is None:
+        return None
+    if width_f <= 50:
+        return 100.0
+    if width_f <= 60:
+        return 70.0
+    if width_f <= 80:
+        return 40.0
+    return 0.0
 
 
 def mean(values: list[float]) -> float | None:
@@ -199,6 +222,7 @@ def factor_key(value: Any) -> str | None:
         "institutional_flow": "institutional_flow",
         "markov regime overlay": "markov_overlay",
         "markov_overlay": "markov_overlay",
+        "gap_down_recovery_when_short_trigger_not_fired_and_vix_cools": "price_action_gap",
     }
     return mapping.get(clean)
 
@@ -280,6 +304,12 @@ def update_offsets(calibration: dict[str, Any], scorecard: dict[str, Any], outco
         "vix_expansion_underweighted": "vix_volatility",
         "vix_cooling_underweighted": "vix_volatility",
         "range_precision_miss": "vix_volatility",
+        "expected_day_range_precision_miss": "vix_volatility",
+        "expected_range_high_edge_miss": "vix_volatility",
+        "expected_range_low_edge_miss": "vix_volatility",
+        "expected_high_zone_too_wide": "vix_volatility",
+        "expected_low_zone_too_wide": "vix_volatility",
+        "target1_rr_below_preferred": "derivatives_logic",
         "legacy_actionable_range_miss": "price_action_gap",
         "option_chain_misread": "derivatives_logic",
         "global_cue_misread": "global_macro",
@@ -301,6 +331,68 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     range_score = bool_score(scorecard.get("range_contained"))
     vix_envelope_score = bool_score(scorecard.get("vix_risk_envelope_contained"))
     primary_range_tolerance_score = bool_score(scorecard.get("expected_range_edge_tolerance_hit"))
+    expected_range_high_error = zone_error(
+        scorecard.get("actual_high"),
+        scorecard.get("expected_range_high"),
+        scorecard.get("expected_range_high"),
+    )
+    expected_range_low_error = zone_error(
+        scorecard.get("actual_low"),
+        scorecard.get("expected_range_low"),
+        scorecard.get("expected_range_low"),
+    )
+    if expected_range_high_error is not None:
+        scorecard["expected_range_high_error"] = expected_range_high_error
+    if expected_range_low_error is not None:
+        scorecard["expected_range_low_error"] = expected_range_low_error
+
+    expected_day_range_precision = scorecard.get("expected_day_range_precision_hit")
+    if (
+        not isinstance(expected_day_range_precision, bool)
+        and expected_range_high_error is not None
+        and expected_range_low_error is not None
+    ):
+        expected_day_range_precision = expected_range_high_error <= 50.0 and expected_range_low_error <= 50.0
+        scorecard["expected_day_range_precision_hit"] = bool(expected_day_range_precision)
+
+    if expected_day_range_precision is False:
+        tags = scorecard.setdefault("failure_tags", [])
+        if "expected_day_range_precision_miss" not in tags:
+            tags.append("expected_day_range_precision_miss")
+        if (
+            expected_range_high_error is not None
+            and expected_range_high_error > 50.0
+            and "expected_range_high_edge_miss" not in tags
+        ):
+            tags.append("expected_range_high_edge_miss")
+        if (
+            expected_range_low_error is not None
+            and expected_range_low_error > 50.0
+            and "expected_range_low_edge_miss" not in tags
+        ):
+            tags.append("expected_range_low_edge_miss")
+
+    expected_high_zone_width = None
+    expected_low_zone_width = None
+    high_zone_low = numeric(scorecard.get("expected_high_zone_low"))
+    high_zone_high = numeric(scorecard.get("expected_high_zone_high"))
+    low_zone_low = numeric(scorecard.get("expected_low_zone_low"))
+    low_zone_high = numeric(scorecard.get("expected_low_zone_high"))
+    if high_zone_low is not None and high_zone_high is not None:
+        expected_high_zone_width = abs(high_zone_high - high_zone_low)
+        scorecard["expected_high_zone_width"] = expected_high_zone_width
+    if low_zone_low is not None and low_zone_high is not None:
+        expected_low_zone_width = abs(low_zone_high - low_zone_low)
+        scorecard["expected_low_zone_width"] = expected_low_zone_width
+
+    tags = scorecard.setdefault("failure_tags", [])
+    if expected_high_zone_width is not None and expected_high_zone_width > 60:
+        if "expected_high_zone_too_wide" not in tags:
+            tags.append("expected_high_zone_too_wide")
+    if expected_low_zone_width is not None and expected_low_zone_width > 60:
+        if "expected_low_zone_too_wide" not in tags:
+            tags.append("expected_low_zone_too_wide")
+
     high_error = zone_error(
         scorecard.get("actual_high"),
         scorecard.get("expected_high_zone_low"),
@@ -371,11 +463,73 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
         remove_failure_tag(scorecard, "legacy_actionable_range_miss")
 
     range_precision_score = bool_score(range_precision)
+    expected_day_range_precision_score = bool_score(expected_day_range_precision)
     legacy_actionable_score = bool_score(legacy_actionable_hit)
     scenario_score = bool_score(scorecard.get("scenario_hit"))
     key_level_score = scorecard.get("key_level_score")
     execution_trigger_score = scorecard.get("execution_trigger_score")
     trader_scores = scorecard.get("trader_plan_scores") or {}
+    opening_map = scorecard.get("opening_execution_map") or {}
+    tags = scorecard.setdefault("failure_tags", [])
+
+    long_target1_rr = numeric(scorecard.get("long_target1_rr"))
+    long_target2_rr = numeric(scorecard.get("long_target2_rr"))
+    short_target1_rr = numeric(scorecard.get("short_target1_rr"))
+    short_target2_rr = numeric(scorecard.get("short_target2_rr"))
+    if isinstance(opening_map, dict):
+        long_trigger = numeric(opening_map.get("long_trigger"))
+        long_stop = numeric(opening_map.get("long_stop"))
+        long_targets = opening_map.get("long_targets")
+        short_trigger = numeric(opening_map.get("short_trigger"))
+        short_stop = numeric(opening_map.get("short_stop"))
+        short_targets = opening_map.get("short_targets")
+        if long_trigger is not None and long_stop is not None and isinstance(long_targets, list):
+            long_risk = long_trigger - long_stop
+            if long_risk > 0 and len(long_targets) >= 1 and numeric(long_targets[0]) is not None:
+                long_target1_rr = (numeric(long_targets[0]) - long_trigger) / long_risk
+                scorecard["long_target1_rr"] = round(long_target1_rr, 2)
+            if long_risk > 0 and len(long_targets) >= 2 and numeric(long_targets[1]) is not None:
+                long_target2_rr = (numeric(long_targets[1]) - long_trigger) / long_risk
+                scorecard["long_target2_rr"] = round(long_target2_rr, 2)
+        if short_trigger is not None and short_stop is not None and isinstance(short_targets, list):
+            short_risk = short_stop - short_trigger
+            if short_risk > 0 and len(short_targets) >= 1 and numeric(short_targets[0]) is not None:
+                short_target1_rr = (short_trigger - numeric(short_targets[0])) / short_risk
+                scorecard["short_target1_rr"] = round(short_target1_rr, 2)
+            if short_risk > 0 and len(short_targets) >= 2 and numeric(short_targets[1]) is not None:
+                short_target2_rr = (short_trigger - numeric(short_targets[1])) / short_risk
+                scorecard["short_target2_rr"] = round(short_target2_rr, 2)
+
+        long_fired = opening_map.get("long_trigger_hit") is True
+        short_fired = opening_map.get("short_trigger_hit") is True
+        if long_fired and long_target1_rr is not None and long_target1_rr < 1.5:
+            if "target1_rr_below_preferred" not in tags:
+                tags.append("target1_rr_below_preferred")
+        if short_fired and short_target1_rr is not None and short_target1_rr < 1.5:
+            if "target1_rr_below_preferred" not in tags:
+                tags.append("target1_rr_below_preferred")
+
+    target1_rr_quality = None
+    fired_rr_values: list[float] = []
+    if isinstance(opening_map, dict) and opening_map.get("long_trigger_hit") is True and long_target1_rr is not None:
+        fired_rr_values.append(float(long_target1_rr))
+    if isinstance(opening_map, dict) and opening_map.get("short_trigger_hit") is True and short_target1_rr is not None:
+        fired_rr_values.append(float(short_target1_rr))
+    if fired_rr_values:
+        target1_rr_quality = 100.0 if min(fired_rr_values) >= 1.5 else 0.0
+
+    zone_width_quality_score = mean(
+        [
+            score
+            for score in [
+                zone_width_score(expected_high_zone_width),
+                zone_width_score(expected_low_zone_width),
+            ]
+            if score is not None
+        ]
+    )
+    if zone_width_quality_score is not None:
+        scorecard["expected_zone_width_quality_score"] = round(zone_width_quality_score, 2)
 
     outcome_score = mean(
         [
@@ -383,13 +537,22 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
             for v in [
                 direction_score,
                 range_precision_score if range_precision_score is not None else range_score,
+                expected_day_range_precision_score,
                 scenario_score,
                 float(key_level_score) if isinstance(key_level_score, (int, float)) else None,
+                float(execution_trigger_score) if isinstance(execution_trigger_score, (int, float)) else None,
                 mean([float(v) for v in trader_scores.values() if isinstance(v, (int, float))]),
+                target1_rr_quality,
+                zone_width_quality_score,
             ]
             if v is not None
         ]
     )
+    if outcome_score is not None:
+        scorecard["calibration_outcome_score"] = round(outcome_score, 2)
+        section_scores = scorecard.setdefault("section_scores", {})
+        if isinstance(section_scores, dict):
+            section_scores["calibration_outcome_score"] = round(outcome_score, 2)
 
     confidence = scorecard.get("morning_overall_confidence")
     confidence_value = float(confidence) if isinstance(confidence, (int, float)) else None
@@ -398,9 +561,19 @@ def apply_scorecard(calibration: dict[str, Any], scorecard_path: Path) -> dict[s
     rolling_metric(calibration, "range_containment_rate", range_score)
     rolling_metric(calibration, "vix_risk_envelope_containment_rate", vix_envelope_score)
     rolling_metric(calibration, "primary_expected_range_tolerance_hit_rate", primary_range_tolerance_score)
+    rolling_metric(calibration, "expected_day_range_precision_hit_rate", expected_day_range_precision_score)
+    rolling_metric(calibration, "average_expected_range_high_error", expected_range_high_error)
+    rolling_metric(calibration, "average_expected_range_low_error", expected_range_low_error)
     rolling_metric(calibration, "range_precision_hit_rate", range_precision_score)
     rolling_metric(calibration, "average_high_zone_error", high_error)
     rolling_metric(calibration, "average_low_zone_error", low_error)
+    rolling_metric(calibration, "average_expected_high_zone_width", expected_high_zone_width)
+    rolling_metric(calibration, "average_expected_low_zone_width", expected_low_zone_width)
+    rolling_metric(calibration, "target1_rr_quality_rate", target1_rr_quality)
+    rolling_metric(calibration, "average_long_target1_rr", long_target1_rr)
+    rolling_metric(calibration, "average_long_target2_rr", long_target2_rr)
+    rolling_metric(calibration, "average_short_target1_rr", short_target1_rr)
+    rolling_metric(calibration, "average_short_target2_rr", short_target2_rr)
     rolling_metric(calibration, "legacy_actionable_range_hit_rate", legacy_actionable_score)
     rolling_metric(calibration, "average_legacy_actionable_high_error", legacy_actionable_high_error)
     rolling_metric(calibration, "average_legacy_actionable_low_error", legacy_actionable_low_error)

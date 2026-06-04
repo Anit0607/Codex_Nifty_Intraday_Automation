@@ -2,15 +2,22 @@
   "actual_close_vs_open": "below_open",
   "actual_high": 24002.8,
   "actual_low": 23484.75,
+  "calibration_outcome_score": 31.75,
   "date": "2026-05-29",
   "direction_hit": false,
   "direction_precision_basis": "legacy_non_binary_forecast",
+  "expected_day_range_precision_hit": false,
   "expected_high_zone_high": 24241.0,
   "expected_high_zone_low": 24241.0,
+  "expected_high_zone_width": 0.0,
   "expected_low_zone_high": 23564.0,
   "expected_low_zone_low": 23564.0,
+  "expected_low_zone_width": 0.0,
   "expected_range_high": 24241.0,
+  "expected_range_high_error": 238.20000000000073,
   "expected_range_low": 23564.0,
+  "expected_range_low_error": 79.25,
+  "expected_zone_width_quality_score": 100.0,
   "failure_tags": [
     "direction_miss",
     "expected_range_low_breach",
@@ -24,7 +31,10 @@
     "expected_high_miss",
     "expected_low_miss",
     "legacy_actionable_range_miss",
-    "non_binary_direction_forecast"
+    "non_binary_direction_forecast",
+    "expected_day_range_precision_miss",
+    "expected_range_high_edge_miss",
+    "expected_range_low_edge_miss"
   ],
   "high_zone_error": 238.20000000000073,
   "key_level_score": 62.0,
@@ -43,6 +53,9 @@
   "range_precision_basis": "legacy_expected_range_edges",
   "range_precision_hit": false,
   "scenario_hit": false,
+  "section_scores": {
+    "calibration_outcome_score": 31.75
+  },
   "trader_plan_scores": {
     "future_intraday_trader": 62.0,
     "option_buyer": 76.0,

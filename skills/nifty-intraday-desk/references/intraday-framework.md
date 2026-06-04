@@ -94,7 +94,7 @@ Always separate:
 - Primary Expected Day Range: the practical forecast range built from Expected Low Zone to Expected High Zone. This is the range the evening tally must judge against the +/-50 point tolerance.
 - Expected High Zone: most likely day-high area, usually a 40-80 point band built from CPR, R1/R2, previous high, option resistance, and round numbers.
 - Expected Low Zone: most likely day-low area, usually a 40-80 point band built from CPR, S1/S2, previous low, option support, and round numbers.
-- Tail Expansion Zones: upside/downside extension targets if the primary range fails.
+- Tail Expansion Zones: upside/downside extension targets if the primary range fails. Calculate them in the backend for invalidation/risk awareness, but do not show them in the morning report header.
 - Opening Execution Map: trigger-based trading plan with no-trade/chop zone, long trigger, short trigger, stop-loss logic, and targets.
 
 Do not label the VIX risk envelope as "Expected Day Range." The report header's Expected Day Range must be the primary forecast range, not the wide VIX envelope.
@@ -106,7 +106,16 @@ Range precision rule:
 - A high/low zone is acceptable only if the actual high/low is inside the zone or within 50 points of the nearest zone edge.
 - If either side misses by more than 50 points, mark `range_precision_hit=false` even if the broad VIX range contained the day.
 - Range containment is not a model success by itself; it only means the risk envelope was wide enough.
+- Expected Day Range edge precision must also be scored separately from containment. A contained day is not enough if the actual high or low is more than 50 points away from the corresponding Expected Day Range edge.
+- Expected High Zone and Expected Low Zone should normally be 30-50 points wide. Width above 60 points is a visible-quality failure unless marked as exceptional uncertainty with lower confidence. Width above 80 points is not acceptable for a trader-facing precision zone.
 - Legacy Actionable Desk Range precision must be audited separately when it appears in older reports. Treat its lower edge as a low forecast and upper edge as a high forecast; if either edge misses actual low/high by more than 50 points, tag `legacy_actionable_range_miss`. Do not promote it back into the report unless repeated evidence supports it.
+
+Execution risk-reward rule:
+
+- For long/short triggers, calculate risk from trigger to SL and reward from trigger to target 1 and target 2.
+- Target 1 RR should preferably be at least 1.5. If it is below 1.25, mark the setup as weak/scalp-only or adjust the trigger/target.
+- Target 2 RR should preferably be at least 2.0.
+- The evening tally must report whether each trigger fired, which targets were reached, and the actual target-1/target-2 RR.
 
 Range construction guardrails:
 

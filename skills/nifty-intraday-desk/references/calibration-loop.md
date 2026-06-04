@@ -18,6 +18,9 @@ Create `learning/scorecards/YYYY-MM-DD.json`:
   "direction_hit": true,
   "expected_range_low": 0.0,
   "expected_range_high": 0.0,
+  "expected_range_low_error": 0.0,
+  "expected_range_high_error": 0.0,
+  "expected_day_range_precision_hit": true,
   "vix_risk_envelope_low": 0.0,
   "vix_risk_envelope_high": 0.0,
   "actual_low": 0.0,
@@ -27,9 +30,15 @@ Create `learning/scorecards/YYYY-MM-DD.json`:
   "expected_high_zone_high": 0.0,
   "expected_low_zone_low": 0.0,
   "expected_low_zone_high": 0.0,
+  "expected_high_zone_width": 0.0,
+  "expected_low_zone_width": 0.0,
   "high_zone_error": 0.0,
   "low_zone_error": 0.0,
   "range_precision_hit": true,
+  "long_target1_rr": 0.0,
+  "long_target2_rr": 0.0,
+  "short_target1_rr": 0.0,
+  "short_target2_rr": 0.0,
   "legacy_actionable_range_low": 0.0,
   "legacy_actionable_range_high": 0.0,
   "legacy_actionable_low_error": 0.0,
@@ -62,9 +71,11 @@ Score each section from 0 to 100:
 - Market summary.
 - Trader key levels: whether the visible long/short triggers, target zones, chop zone, and invalidation were useful.
 - VIX risk envelope containment.
-- Primary expected day range.
+- Primary expected day range containment and edge precision.
 - Expected high/low zone precision.
+- High/low zone width discipline.
 - Opening execution map trigger quality.
+- Trigger risk-reward quality.
 - Close vs open direction.
 - Probability model.
 - Factor scoring.
@@ -79,6 +90,9 @@ Allowed automatic changes:
 - Update rolling hit rates.
 - Update average confidence error.
 - Track VIX risk-envelope containment separately from primary expected-range tolerance and high/low zone precision.
+- Track Expected Day Range edge precision separately from containment; mark a miss when actual high/low is more than 50 points from the corresponding range edge.
+- Track high/low zone width. Add `expected_high_zone_too_wide` or `expected_low_zone_too_wide` if width is above 60 points.
+- Track long/short trigger risk-reward. Add `target1_rr_below_preferred` when a fired trigger's first target has RR below 1.5.
 - Treat close-vs-open direction as binary only. `predicted_close_vs_open` and `actual_close_vs_open` must be `above_open` or `below_open`; legacy `near_open` forecasts should be tagged `non_binary_direction_forecast` and must not be counted as a clean direction hit.
 - Update high/low range precision hit rate.
 - Add range miss tags when actual high/low misses the expected high/low zone by more than 50 points.

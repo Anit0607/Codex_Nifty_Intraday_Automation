@@ -22,7 +22,6 @@ Expected Range Confidence: XX%
 
 Expected High Zone: XXXX - XXXX
 Expected Low Zone: XXXX - XXXX
-Tail Expansion Zones: Upside XXXX - XXXX / Downside XXXX - XXXX
 Range Precision Confidence: XX%
 
 Opening Execution Map:

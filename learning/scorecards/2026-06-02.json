@@ -74,22 +74,33 @@
       }
     ]
   },
+  "calibration_outcome_score": 40.56,
   "date": "2026-06-02",
   "direction_hit": false,
   "execution_trigger_score": 82.0,
+  "expected_day_range_precision_hit": false,
   "expected_high_zone_high": 23530.0,
   "expected_high_zone_low": 23470.0,
+  "expected_high_zone_width": 60.0,
   "expected_low_zone_high": 23220.0,
   "expected_low_zone_low": 23120.0,
+  "expected_low_zone_width": 100.0,
   "expected_range_edge_tolerance_hit": true,
   "expected_range_high": 23530.0,
+  "expected_range_high_error": 26.950000000000728,
   "expected_range_low": 23120.0,
+  "expected_range_low_error": 109.15000000000146,
+  "expected_zone_width_quality_score": 35.0,
   "failure_tags": [
     "direction_miss",
     "leading_bearish_scenario_miss",
     "sell_on_rise_classification_miss",
     "vix_cooling_underweighted",
-    "primary_range_exact_high_breach_within_tolerance"
+    "primary_range_exact_high_breach_within_tolerance",
+    "expected_day_range_precision_miss",
+    "expected_range_low_edge_miss",
+    "expected_low_zone_too_wide",
+    "target1_rr_below_preferred"
   ],
   "high_zone_error": 26.950000000000728,
   "institutional_flow_status": "same_day_final_or_provisional_values_not_reliably_available_in_accessible_sources_at_tally_time",
@@ -100,6 +111,8 @@
   "legacy_actionable_range_miss": false,
   "legacy_actionable_range_present": false,
   "legacy_expected_day_range_scored_as_zones": false,
+  "long_target1_rr": 1.25,
+  "long_target2_rr": 2.08,
   "low_zone_error": 9.150000000001455,
   "market_open": true,
   "market_open_verification": {
@@ -135,6 +148,7 @@
   "same_day_fii_cash_net_cr": null,
   "scenario_hit": false,
   "section_scores": {
+    "calibration_outcome_score": 40.56,
     "close_vs_open_direction": 0.0,
     "confidence_calibration": 45.0,
     "expected_high_low_zone_precision": 88.0,
@@ -150,6 +164,8 @@
     "trader_specific_guidance": 70.0,
     "vix_risk_envelope_containment": 100.0
   },
+  "short_target1_rr": 1.08,
+  "short_target2_rr": 2.46,
   "tally_boundary_ist": "post-market after 17:00",
   "trader_plan_scores": {
     "future_intraday_trader": 82.0,

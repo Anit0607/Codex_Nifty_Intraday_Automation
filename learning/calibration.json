@@ -1,19 +1,28 @@
 {
   "average_confidence": 62.57142857142857,
   "average_execution_trigger_score": 84.0,
+  "average_expected_high_zone_width": 31.428571428571427,
+  "average_expected_low_zone_width": 37.857142857142854,
+  "average_expected_range_high_error": 174.5,
+  "average_expected_range_low_error": 140.97857142857174,
   "average_high_zone_error": 158.11428571428561,
   "average_legacy_actionable_high_error": 76.23333333333358,
   "average_legacy_actionable_low_error": 167.28333333333285,
+  "average_long_target1_rr": 1.2390350877192984,
+  "average_long_target2_rr": 2.3574561403508776,
   "average_low_zone_error": 116.69285714285745,
-  "average_outcome_score": 56.31428571428571,
-  "confidence_error": 6.257142857142859,
+  "average_outcome_score": 49.38336167800453,
+  "average_short_target1_rr": 0.9670329670329669,
+  "average_short_target2_rr": 2.230769230769231,
+  "confidence_error": 13.188066893424033,
   "direction_hit_rate": 28.571428571428573,
+  "expected_day_range_precision_hit_rate": 0.0,
   "factor_confidence_offsets": {
     "derivatives_logic": -0.5,
     "global_macro": 0,
     "institutional_flow": -1.0,
     "markov_overlay": 0,
-    "price_action_gap": -10,
+    "price_action_gap": -9.0,
     "vix_volatility": -6.0
   },
   "failure_tag_counts": {
@@ -23,9 +32,14 @@
     "bearish_secondary_scenario_worked": 1,
     "constructive_bias_miss": 1,
     "direction_miss": 2,
+    "expected_day_range_precision_miss": 7,
     "expected_high_miss": 4,
+    "expected_high_zone_too_wide": 2,
     "expected_low_miss": 4,
+    "expected_low_zone_too_wide": 3,
+    "expected_range_high_edge_miss": 5,
     "expected_range_low_breach": 1,
+    "expected_range_low_edge_miss": 6,
     "expiry_narrow_cpr_underweighted": 1,
     "fii_pressure_materialized": 1,
     "gap_up_failed": 1,
@@ -46,6 +60,7 @@
     "sideways_leading_scenario_failed": 1,
     "sideways_scenario_overweighted": 1,
     "support_zone_failed": 1,
+    "target1_rr_below_preferred": 2,
     "vix_cooling_underweighted": 1,
     "vix_expansion_underweighted": 1
   },
@@ -53,18 +68,28 @@
   "metric_counts": {
     "average_confidence": 7,
     "average_execution_trigger_score": 3,
+    "average_expected_high_zone_width": 7,
+    "average_expected_low_zone_width": 7,
+    "average_expected_range_high_error": 7,
+    "average_expected_range_low_error": 7,
     "average_high_zone_error": 7,
     "average_legacy_actionable_high_error": 3,
     "average_legacy_actionable_low_error": 3,
+    "average_long_target1_rr": 2,
+    "average_long_target2_rr": 2,
     "average_low_zone_error": 7,
     "average_outcome_score": 7,
+    "average_short_target1_rr": 2,
+    "average_short_target2_rr": 2,
     "confidence_error": 7,
     "direction_hit_rate": 7,
+    "expected_day_range_precision_hit_rate": 7,
     "legacy_actionable_range_hit_rate": 3,
     "primary_expected_range_tolerance_hit_rate": 1,
     "range_containment_rate": 7,
     "range_precision_hit_rate": 7,
     "scenario_hit_rate": 7,
+    "target1_rr_quality_rate": 2,
     "vix_risk_envelope_containment_rate": 1
   },
   "notes": [
@@ -94,7 +119,7 @@
     },
     {
       "date": "2026-06-04",
-      "note": "Morning report performed well. The gap-down recovery call, primary expected range, high zone, close-vs-open direction, and VIX-cooling thesis were all validated. Low zone was not touched exactly but remained within the +/-50 point tolerance. No expected_high_miss, expected_low_miss, or range_precision_miss tags apply."
+      "note": "Mixed result, not a clean high-score day. Close-vs-open direction, high-zone placement, VIX cooling, and long target 1 worked. Expected Day Range edge precision failed on the low side by 92.30 points, both visible high/low zones were too wide for trader use, and the fired long target-1 RR was only 1.23 versus the preferred 1.50+ threshold."
     }
   ],
   "pattern_counts": {
@@ -105,7 +130,8 @@
   "range_precision_hit_rate": 42.857142857142854,
   "sample_count": 7,
   "scenario_hit_rate": 57.142857142857146,
-  "updated_at": "2026-06-04T14:17:07.052483+00:00",
+  "target1_rr_quality_rate": 0.0,
+  "updated_at": "2026-06-04T18:44:06.691609+00:00",
   "version": 1,
   "vix_risk_envelope_containment_rate": 100.0
 }

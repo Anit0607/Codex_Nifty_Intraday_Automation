@@ -164,18 +164,31 @@ def poll_background_response(response_id: str, headers: dict[str, str], timeout_
 
 
 def build_common_context() -> str:
-    return "\n\n".join(
-        [
-            "# Skill",
-            read_text(SKILL_DIR / "SKILL.md"),
-            "# Intraday Framework",
-            read_text(REFERENCES_DIR / "intraday-framework.md"),
-            "# Report Template",
-            read_text(REFERENCES_DIR / "report-template.md"),
-            "# Automation Ops",
-            read_text(REFERENCES_DIR / "automation-ops.md"),
-        ]
-    )
+    sections = [
+        "# Skill",
+        read_text(SKILL_DIR / "SKILL.md"),
+        "# Intraday Framework",
+        read_text(REFERENCES_DIR / "intraday-framework.md"),
+        "# Report Template",
+        read_text(REFERENCES_DIR / "report-template.md"),
+        "# Automation Ops",
+        read_text(REFERENCES_DIR / "automation-ops.md"),
+    ]
+    calibration_path = ROOT / "learning" / "calibration.json"
+    if calibration_path.exists():
+        sections.extend(
+            [
+                "# Current Calibration State",
+                read_text(calibration_path),
+                (
+                    "Use the calibration state as a bounded adjustment layer. "
+                    "Apply factor_confidence_offsets, pattern_counts, failure_tag_counts, "
+                    "and rolling hit/error rates to confidence and scenario weighting. "
+                    "Do not override fresh market evidence or rewrite core rules."
+                ),
+            ]
+        )
+    return "\n\n".join(sections)
 
 
 def morning_prompt(date: str) -> str:
@@ -197,9 +210,11 @@ template. Include clickable source links in a Sources section at the end.
 
 Critical range requirement:
 - Do not present the VIX statistical envelope as the tradable Expected Day Range.
-- In the header, include VIX Risk Envelope, Expected Day Range, Expected High Zone, Expected Low Zone, Tail Expansion Zones, Range Precision Confidence, and Opening Execution Map.
+- In the header, include VIX Risk Envelope, Expected Day Range, Expected High Zone, Expected Low Zone, Range Precision Confidence, and Opening Execution Map.
 - Expected Day Range is the primary practical forecast range derived from Expected Low Zone and Expected High Zone, not the VIX envelope.
 - Expected High Zone and Expected Low Zone are the primary high/low forecast and should target practical precision, normally within about +/-50 points of actual if the model is good.
+- Keep Expected High Zone and Expected Low Zone tight: target 30-50 points wide; avoid more than 60 points unless explicitly lowering confidence for exceptional uncertainty.
+- Do not show Tail Expansion Zones in the morning report. Keep tail levels internal and express them only as invalidation/risk levels if needed.
 - Do not include "Actionable Desk Range" in new morning reports. Use Opening Execution Map instead: No-Trade/Chop Zone, Long Trigger with SL/targets, Short Trigger with SL/targets, and Execution Confidence.
 - If uncertainty is high, widen the high/low zones honestly and lower confidence; do not hide uncertainty inside the VIX envelope.
 
@@ -260,11 +275,19 @@ Scorecard requirements:
 - predicted_close_vs_open and actual_close_vs_open must be normalized to above_open or below_open only. Do not use near_open.
 - Include expected_high_zone_low, expected_high_zone_high, expected_low_zone_low, expected_low_zone_high.
 - Include high_zone_error and low_zone_error if calculable.
+- Include expected_range_high_error, expected_range_low_error, and expected_day_range_precision_hit. Score Expected Day Range edge precision separately from containment.
+- Include expected_high_zone_width and expected_low_zone_width. Add expected_high_zone_too_wide / expected_low_zone_too_wide when zone width is above 60 points.
+- Include long_target1_rr, long_target2_rr, short_target1_rr, short_target2_rr when trigger, SL, and targets are available. Add target1_rr_below_preferred if fired target-1 RR is below 1.5.
 - If the morning report has only a legacy Expected Day Range and no high/low zones, treat the high edge and low edge as legacy high/low zone forecasts and score them against the +/-50 point tolerance.
 - If the morning report contains a legacy Actionable Desk Range, score it separately as legacy_actionable_range_hit using the same +/-50 edge tolerance, add legacy_actionable_range_miss when it fails, and do not let it override the primary Expected Day Range score.
 - Set range_precision_hit=false if actual high or low misses the expected zone by more than 50 points.
 - Do not treat range_contained=true as sufficient success when range_precision_hit=false.
 - Add failure tags expected_high_miss, expected_low_miss, and range_precision_miss when applicable.
+
+Evening tally format requirement:
+- Include a trader audit table with: Item, Predicted, Actual, Deviation / Result, Verdict, Auto-heal action.
+- The table must cover VIX Risk Envelope, Expected Day Range edge precision, Expected High Zone, Expected Low Zone, visible tail-zone usefulness if any were printed, long trigger RR/targets, short trigger RR/targets, and close-vs-open direction.
+- Do not award a high overall score only because broad containment passed; penalize wide zones, poor target RR, redundant visible ranges, and Expected Day Range edge misses.
 
 {build_common_context()}
 
