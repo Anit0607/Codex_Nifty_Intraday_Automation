@@ -1,0 +1,117 @@
+{
+  "actual_close": 23416.55,
+  "actual_close_vs_open": "above_open",
+  "actual_day_range": 218.0,
+  "actual_high": 23465.3,
+  "actual_india_vix_change_percent": -2.41,
+  "actual_india_vix_close": 15.89,
+  "actual_low": 23247.3,
+  "actual_open": 23282.45,
+  "bounded_auto_healing": {
+    "disallowed_changes_not_performed": [
+      "no_core_skill_logic_rewrite",
+      "no_cpr_math_change",
+      "no_probability_model_replacement",
+      "no_risk_warning_removal",
+      "no_leverage_or_position_size_increase"
+    ],
+    "processed_in_scorecard": true,
+    "updates": [
+      {
+        "applied": true,
+        "metric": "close_direction_binary_hit_rate",
+        "type": "rolling_metric_observation",
+        "value": "hit"
+      },
+      {
+        "applied": true,
+        "metric": "primary_expected_range_containment_rate",
+        "type": "rolling_metric_observation",
+        "value": "hit"
+      },
+      {
+        "applied": true,
+        "metric": "expected_high_low_zone_precision_rate",
+        "type": "rolling_metric_observation",
+        "value": "hit"
+      },
+      {
+        "applied": true,
+        "increment": 1,
+        "name": "gap_down_low_at_open_vix_cool_reversal",
+        "type": "pattern_flag"
+      },
+      {
+        "applied": true,
+        "bounds": "daily_change_within_3_points_and_factor_offset_must_remain_within_plus_minus_10",
+        "delta_points": 1,
+        "factor": "gap_down_recovery_when_short_trigger_not_fired_and_vix_cools",
+        "type": "confidence_offset"
+      },
+      {
+        "applied": true,
+        "note": "Official NSE close was available; high/low were sourced from a public technical recap because official OHLC CSV was not accessible in the fetched crawl. Prefer NSE/NiftyIndices CSV in automation when reachable.",
+        "source": "post_market_ohlc",
+        "type": "source_reliability_note"
+      }
+    ]
+  },
+  "date": "2026-06-04",
+  "direction_hit": true,
+  "execution_trigger_score": 82.0,
+  "expected_high_zone_high": 23505.0,
+  "expected_high_zone_low": 23420.0,
+  "expected_low_zone_high": 23225.0,
+  "expected_low_zone_low": 23155.0,
+  "expected_range_high": 23505.0,
+  "expected_range_low": 23155.0,
+  "failure_tags": [],
+  "high_zone_error": 0.0,
+  "institutional_flow_status": "04-Jun-2026 final/provisional FII-DII cash flow not source-confirmed in fetched post-market results",
+  "key_level_score": 84.0,
+  "leading_scenario": "bullish",
+  "legacy_actionable_range_high": 0.0,
+  "legacy_actionable_range_low": 0.0,
+  "legacy_actionable_range_miss": false,
+  "legacy_actionable_range_present": false,
+  "low_zone_error": 22.299999999999272,
+  "market_open": true,
+  "morning_overall_confidence": 58,
+  "notes": "Morning report performed well. The gap-down recovery call, primary expected range, high zone, close-vs-open direction, and VIX-cooling thesis were all validated. Low zone was not touched exactly but remained within the +/-50 point tolerance. No expected_high_miss, expected_low_miss, or range_precision_miss tags apply.",
+  "pattern_tags": [
+    "gap_down_low_at_open_vix_cool_reversal",
+    "vix_cooling_supported_recovery",
+    "short_trigger_not_fired",
+    "long_trigger_target1_hit"
+  ],
+  "predicted_close_vs_open": "above_open",
+  "range_contained": true,
+  "range_precision_hit": true,
+  "scenario_hit": true,
+  "section_scores": {
+    "close_vs_open_direction": 100.0,
+    "confidence_calibration": 88.0,
+    "expected_high_low_zone_precision": 95.0,
+    "factor_scoring": 78.0,
+    "header_data_integrity": 92.0,
+    "market_summary": 84.0,
+    "opening_execution_map": 82.0,
+    "overall_tally_score": 86.0,
+    "primary_expected_day_range": 100.0,
+    "probability_model": 86.0,
+    "risk_invalidations": 88.0,
+    "scenario_mapping": 86.0,
+    "trader_key_levels": 84.0,
+    "trader_specific_guidance": 75.0,
+    "vix_risk_envelope_containment": 100.0
+  },
+  "time_boundary": "post-market after 17:00 IST",
+  "trader_plan_scores": {
+    "future_intraday_trader": 80.0,
+    "option_buyer": 78.0,
+    "option_directional_seller": 74.0,
+    "option_non_directional_seller": 68.0
+  },
+  "vix_risk_envelope_high": 23641.0,
+  "vix_risk_envelope_low": 22924.0
+}
