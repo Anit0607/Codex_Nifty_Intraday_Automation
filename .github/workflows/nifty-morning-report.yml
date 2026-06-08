@@ -63,6 +63,7 @@ jobs:
           python skills/nifty-intraday-desk/scripts/cloud_report_agent.py --mode morning --date "${{ github.event.inputs.date || 'today' }}"
 
       - name: Commit generated report
+        if: always()
         run: |
           set +e
           git config user.name "github-actions[bot]"

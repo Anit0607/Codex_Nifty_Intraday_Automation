@@ -330,6 +330,29 @@ def write_file(path: Path, content: str) -> None:
     path.write_text(content.rstrip() + "\n", encoding="utf-8")
 
 
+def sanitized_error(exc: Exception) -> str:
+    text = f"{type(exc).__name__}: {exc}"
+    for name in ["OPENAI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]:
+        secret = os.environ.get(name)
+        if secret:
+            text = text.replace(secret, "***")
+    return text
+
+
+def write_run_error(report_dir: Path, mode: str, date: str, exc: Exception) -> None:
+    timestamp = datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S IST")
+    notice = f"""# Nifty {mode.title()} Automation Error - {date}
+
+Generated At: {timestamp}
+
+The {mode} automation failed before a complete report could be delivered.
+
+Failure:
+{sanitized_error(exc)}
+"""
+    write_file(report_dir / f"{mode}-run-error.md", notice)
+
+
 def run_command(args: list[str]) -> None:
     subprocess.run(args, cwd=ROOT, check=True)
 
@@ -358,9 +381,13 @@ def deliver(markdown_path: Path, title: str, out_dir: Path) -> None:
 def run_morning(date: str) -> None:
     report_dir = ROOT / "reports" / date
     markdown_path = report_dir / "morning-report.md"
-    text = call_openai(morning_prompt(date))
-    write_file(markdown_path, text)
-    deliver(markdown_path, f"Nifty 50 Intraday Desk Report - {date}", report_dir)
+    try:
+        text = call_openai(morning_prompt(date))
+        write_file(markdown_path, text)
+        deliver(markdown_path, f"Nifty 50 Intraday Desk Report - {date}", report_dir)
+    except Exception as exc:
+        write_run_error(report_dir, "morning", date, exc)
+        raise
 
 
 def run_evening(date: str) -> None:
@@ -376,26 +403,30 @@ def run_evening(date: str) -> None:
         deliver(tally_path, f"Nifty 50 Post-Market Tally - {date}", report_dir)
         return
 
-    output = call_openai(evening_prompt(date, read_text(morning_path)))
-    tally = parse_tagged_block(output, "EVENING_TALLY_MARKDOWN")
-    scorecard_text = parse_tagged_block(output, "SCORECARD_JSON")
-    scorecard = json.loads(scorecard_text)
+    try:
+        output = call_openai(evening_prompt(date, read_text(morning_path)))
+        tally = parse_tagged_block(output, "EVENING_TALLY_MARKDOWN")
+        scorecard_text = parse_tagged_block(output, "SCORECARD_JSON")
+        scorecard = json.loads(scorecard_text)
 
-    tally_path = report_dir / "evening-tally.md"
-    scorecard_path = ROOT / "learning" / "scorecards" / f"{date}.json"
-    write_file(tally_path, tally)
-    write_file(scorecard_path, json.dumps(scorecard, indent=2, sort_keys=True))
-    run_command(
-        [
-            sys.executable,
-            str(CALIBRATION_SCRIPT),
-            "--scorecard",
-            str(scorecard_path),
-            "--calibration",
-            str(ROOT / "learning" / "calibration.json"),
-        ]
-    )
-    deliver(tally_path, f"Nifty 50 Post-Market Tally - {date}", report_dir)
+        tally_path = report_dir / "evening-tally.md"
+        scorecard_path = ROOT / "learning" / "scorecards" / f"{date}.json"
+        write_file(tally_path, tally)
+        write_file(scorecard_path, json.dumps(scorecard, indent=2, sort_keys=True))
+        run_command(
+            [
+                sys.executable,
+                str(CALIBRATION_SCRIPT),
+                "--scorecard",
+                str(scorecard_path),
+                "--calibration",
+                str(ROOT / "learning" / "calibration.json"),
+            ]
+        )
+        deliver(tally_path, f"Nifty 50 Post-Market Tally - {date}", report_dir)
+    except Exception as exc:
+        write_run_error(report_dir, "evening", date, exc)
+        raise
 
 
 def main() -> int:
