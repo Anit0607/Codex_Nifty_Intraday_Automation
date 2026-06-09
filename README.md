@@ -13,7 +13,7 @@ Cloud automation is provided through GitHub Actions:
 
 Add these repository secrets before enabling live use:
 
-- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY` (at least one is required)
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 
@@ -23,11 +23,20 @@ Do not create one combined multiline secret with all values. GitHub Actions does
 
 Optional repository variables:
 
+- `AI_PROVIDER_ORDER`, default `anthropic,openai`
+- `ANTHROPIC_MODEL`, default `claude-opus-4-8`
+- `ANTHROPIC_EFFORT`, default `high`
+- `ANTHROPIC_MAX_TOKENS`, default `24000`
+- `ANTHROPIC_TIMEOUT_SECONDS`, default `2400`
+- `ANTHROPIC_WEB_SEARCH_MAX_USES`, default `20`
 - `OPENAI_MODEL`, default `gpt-5.5`
 - `OPENAI_REASONING_EFFORT`, default `high`
 - `OPENAI_BACKGROUND_TIMEOUT_SECONDS`, default `2400`
 
-For maximum-quality runs, set `OPENAI_REASONING_EFFORT=xhigh`. This can materially increase cost and runtime.
+The default provider order attempts Anthropic first, then OpenAI as fallback.
+Enable web search for the Anthropic organization in Claude Console. For
+maximum-quality Anthropic runs, set `ANTHROPIC_EFFORT=xhigh`; this can materially
+increase cost and runtime.
 
 Daily outputs are expected under:
 

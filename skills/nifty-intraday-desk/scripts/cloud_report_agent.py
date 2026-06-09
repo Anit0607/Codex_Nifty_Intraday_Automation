@@ -1,9 +1,10 @@
 """Cloud runner for scheduled Nifty reports.
 
-This script is designed for GitHub Actions. It calls the OpenAI Responses API
+This script is designed for GitHub Actions. It calls a configured AI provider
 with web search enabled, writes the generated Markdown report, optionally writes
 an evening scorecard, runs bounded calibration, and sends the PDF to Telegram
-through deliver_report.py.
+through deliver_report.py. Anthropic Claude and OpenAI are supported with
+provider-level fallback.
 """
 
 from __future__ import annotations
@@ -53,6 +54,17 @@ def extract_response_text(response_json: dict) -> str:
     raise RuntimeError("OpenAI response did not contain output text.")
 
 
+def extract_anthropic_text(response_json: dict) -> str:
+    chunks = [
+        str(block.get("text", ""))
+        for block in response_json.get("content", [])
+        if block.get("type") == "text" and block.get("text")
+    ]
+    if chunks:
+        return "\n".join(chunks).strip()
+    raise RuntimeError(f"Anthropic response did not contain output text: {response_json}")
+
+
 def call_openai(prompt: str) -> str:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
     if not api_key:
@@ -91,6 +103,108 @@ def call_openai(prompt: str) -> str:
     print(f"OpenAI background response started: {response_id} | model={model} | effort={effort}", flush=True)
     completed = poll_background_response(response_id, headers, poll_timeout_seconds)
     return extract_response_text(completed)
+
+
+def call_anthropic(prompt: str) -> str:
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is required for Anthropic automation.")
+
+    model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-8").strip() or "claude-opus-4-8"
+    effort = os.environ.get("ANTHROPIC_EFFORT", "high").strip() or "high"
+    max_tokens = int(os.environ.get("ANTHROPIC_MAX_TOKENS", "24000"))
+    timeout_seconds = int(os.environ.get("ANTHROPIC_TIMEOUT_SECONDS", "2400"))
+    max_searches = int(os.environ.get("ANTHROPIC_WEB_SEARCH_MAX_USES", "20"))
+
+    payload = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "thinking": {"type": "adaptive"},
+        "output_config": {"effort": effort},
+        "messages": [{"role": "user", "content": prompt}],
+        "tools": [
+            {
+                "type": "web_search_20250305",
+                "name": "web_search",
+                "max_uses": max_searches,
+            }
+        ],
+    }
+    headers = {
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+    }
+
+    last_error: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            response = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers=headers,
+                json=payload,
+                timeout=(30, timeout_seconds),
+            )
+        except requests.RequestException as exc:
+            last_error = exc
+            wait = attempt * 20
+            print(f"Anthropic attempt {attempt} failed: {exc}. Retrying in {wait}s.", flush=True)
+            time.sleep(wait)
+            continue
+
+        if response.status_code in {429, 500, 502, 503, 504, 529} and attempt < 3:
+            wait = attempt * 30
+            print(
+                f"Anthropic attempt {attempt} returned {response.status_code}. Retrying in {wait}s.",
+                flush=True,
+            )
+            time.sleep(wait)
+            continue
+
+        if not response.ok:
+            raise RuntimeError(f"Anthropic API failed: {response.status_code} {response.text[:2000]}")
+
+        response_json = response.json()
+        print(
+            f"Anthropic response completed: {response_json.get('id')} | model={model} | effort={effort}",
+            flush=True,
+        )
+        return extract_anthropic_text(response_json)
+
+    raise RuntimeError(f"Anthropic request failed after retries: {last_error}")
+
+
+def provider_order() -> list[str]:
+    raw = os.environ.get("AI_PROVIDER_ORDER", "anthropic,openai")
+    providers: list[str] = []
+    for value in raw.split(","):
+        provider = value.strip().lower()
+        if provider in {"anthropic", "openai"} and provider not in providers:
+            providers.append(provider)
+    return providers or ["anthropic", "openai"]
+
+
+def call_model(prompt: str) -> str:
+    errors: list[str] = []
+    available = {
+        "anthropic": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip()),
+        "openai": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
+    }
+    callers = {"anthropic": call_anthropic, "openai": call_openai}
+
+    for provider in provider_order():
+        if not available[provider]:
+            errors.append(f"{provider}: API key missing")
+            continue
+        try:
+            print(f"Attempting AI provider: {provider}", flush=True)
+            return callers[provider](prompt)
+        except Exception as exc:
+            error = sanitized_error(exc)
+            errors.append(f"{provider}: {error}")
+            print(f"AI provider {provider} failed; trying fallback. {error}", flush=True)
+
+    raise RuntimeError("All configured AI providers failed. " + " | ".join(errors))
 
 
 def create_background_response(payload: dict, headers: dict[str, str]) -> dict:
@@ -332,7 +446,7 @@ def write_file(path: Path, content: str) -> None:
 
 def sanitized_error(exc: Exception) -> str:
     text = f"{type(exc).__name__}: {exc}"
-    for name in ["OPENAI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]:
+    for name in ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]:
         secret = os.environ.get(name)
         if secret:
             text = text.replace(secret, "***")
@@ -382,7 +496,7 @@ def run_morning(date: str) -> None:
     report_dir = ROOT / "reports" / date
     markdown_path = report_dir / "morning-report.md"
     try:
-        text = call_openai(morning_prompt(date))
+        text = call_model(morning_prompt(date))
         write_file(markdown_path, text)
         deliver(markdown_path, f"Nifty 50 Intraday Desk Report - {date}", report_dir)
     except Exception as exc:
@@ -404,7 +518,7 @@ def run_evening(date: str) -> None:
         return
 
     try:
-        output = call_openai(evening_prompt(date, read_text(morning_path)))
+        output = call_model(evening_prompt(date, read_text(morning_path)))
         tally = parse_tagged_block(output, "EVENING_TALLY_MARKDOWN")
         scorecard_text = parse_tagged_block(output, "SCORECARD_JSON")
         scorecard = json.loads(scorecard_text)

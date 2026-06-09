@@ -17,6 +17,17 @@ Optional later upgrade:
 Use a local `.env` file or process environment:
 
 ```text
+# AI providers. Configure at least one. Default order uses Anthropic first.
+AI_PROVIDER_ORDER=anthropic,openai
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-opus-4-8
+ANTHROPIC_EFFORT=high
+
+# Optional OpenAI fallback
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-5.5
+OPENAI_REASONING_EFFORT=high
+
 TELEGRAM_BOT_TOKEN=123456:ABC...
 TELEGRAM_CHAT_ID=-1001234567890
 
@@ -27,6 +38,30 @@ REPORT_EMAIL_TO=recipient@example.com
 ```
 
 Use a Gmail app password, not the normal Gmail password.
+
+## AI Provider Failover
+
+The cloud agent supports:
+
+- Anthropic Claude API using `claude-opus-4-8` with adaptive thinking and
+  high effort.
+- OpenAI Responses API as an alternate provider.
+
+`AI_PROVIDER_ORDER` controls priority. The default is `anthropic,openai`.
+When the first provider fails because of quota, authentication, rate limits,
+network errors, or another provider-level error, the agent attempts the next
+configured provider.
+
+For GitHub Actions, create separate repository secrets:
+
+- `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY` (optional fallback)
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+
+Enable Anthropic web search in the Claude Console organization. Without web
+search, Claude cannot reliably fetch current market data for LIVE reports.
+Never store provider keys in the repository.
 
 ## Delivery
 

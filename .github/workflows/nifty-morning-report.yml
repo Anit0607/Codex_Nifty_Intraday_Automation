@@ -21,6 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
+      AI_PROVIDER_ORDER: ${{ vars.AI_PROVIDER_ORDER || 'anthropic,openai' }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-opus-4-8' }}
+      ANTHROPIC_EFFORT: ${{ vars.ANTHROPIC_EFFORT || 'high' }}
+      ANTHROPIC_MAX_TOKENS: ${{ vars.ANTHROPIC_MAX_TOKENS || '24000' }}
+      ANTHROPIC_TIMEOUT_SECONDS: ${{ vars.ANTHROPIC_TIMEOUT_SECONDS || '2400' }}
+      ANTHROPIC_WEB_SEARCH_MAX_USES: ${{ vars.ANTHROPIC_WEB_SEARCH_MAX_USES || '20' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.5' }}
       OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'high' }}
@@ -43,12 +50,15 @@ jobs:
       - name: Validate required secrets
         run: |
           missing=0
-          if [ -z "$OPENAI_API_KEY" ]; then
-            if [ -n "$CODEX_NIFTY_INTRADAY_AUTOMATION" ]; then
-              echo "::error::Detected combined secret CODEX_NIFTY_INTRADAY_AUTOMATION. GitHub secrets are not parsed from multiline values; create separate repository secrets named OPENAI_API_KEY, TELEGRAM_BOT_TOKEN, and TELEGRAM_CHAT_ID."
-            fi
-            echo "::error::Missing GitHub Actions secret OPENAI_API_KEY"
+          if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Missing AI provider key. Add ANTHROPIC_API_KEY and/or OPENAI_API_KEY."
             missing=1
+          fi
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::Missing ANTHROPIC_API_KEY; Anthropic provider will be skipped."
+          fi
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::warning::Missing OPENAI_API_KEY; OpenAI provider will be skipped."
           fi
           if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
             echo "::warning::Missing TELEGRAM_BOT_TOKEN; report will be generated but Telegram delivery will be skipped."
